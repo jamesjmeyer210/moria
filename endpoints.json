@@ -1,0 +1,42 @@
+[
+  {
+    "origin": "http://127.0.0.1:9000",
+    "endpoints": [
+      {
+        "path": "/api/user",
+        "method": "GET",
+        "groups": ["users","admins"]
+      },
+      {
+        "path": "/api/user",
+        "method": "POST",
+        "groups": ["users"]
+      },
+      {
+        "path": "/api/user/login",
+        "method": "GET",
+        "groups": []
+      },
+      {
+        "path": "/api/always/404",
+        "method": "GET",
+        "groups": []
+      },
+      {
+        "path": "/api/always/401",
+        "method": "GET",
+        "groups": []
+      }
+    ]
+  },
+  {
+    "origin": "http://127.0.0.1:9001",
+    "endpoints": [
+      {
+        "path": "/api/vendor",
+        "method": "GET",
+        "groups": ["vendors","admins"]
+      }
+    ]
+  }
+]
