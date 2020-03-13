@@ -3,8 +3,6 @@ use std::collections::HashMap;
 use actix_web::client::{Client};
 use std::str;
 
-const PAYLOAD_SIZE: usize = 200_000;
-
 mod model;
 mod startup;
 mod jwt;
@@ -76,15 +74,15 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move||{
         // OPTIMIZE: Client is created locally because it cannot be safely shared between threads.
         // It could be possible the client could be wrapped in a Mutex and accessed concurrently,
-        // but in the short term we'll have to settle on setting a limit to the max number of threads
-        // because each thread owns a client.
+        // but that could lead to thread locks. In the short term we'll have to settle on setting a
+        // limit to the max number of threads because each thread owns a client.
         let client = Client::new();
 
         App::new()
             .app_data(config.clone())
             .app_data(auth_map.clone())
             .data(client)
-            .data(web::PayloadConfig::new(PAYLOAD_SIZE))
+            .data(web::PayloadConfig::new(config.max_payload_size))
             .default_service(web::route().to(forward))
     })
     .bind("127.0.0.1:8000")?
