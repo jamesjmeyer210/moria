@@ -67,7 +67,8 @@ mod tests {
         Config {
             jwt_key_name: jwt_key.to_string(),
             jwt_secret: jwt_value.to_string(),
-            max_threads: 0,
+            max_connection: 0,
+            max_rate_of_connection: 0,
             timeout: 0,
             max_payload_size: 0,
         }

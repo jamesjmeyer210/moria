@@ -6,11 +6,13 @@ pub struct Config {
     pub jwt_key_name: String,
     #[serde(rename = "jwtSecret")]
     pub jwt_secret: String,
-    #[serde(rename = "maxThreads")]
-    pub max_threads: u32,
-    pub timeout: u32,
+    #[serde(rename = "maxConnection")]
+    pub max_connection: usize,
+    #[serde(rename = "maxRateOfConnection")]
+    pub max_rate_of_connection: usize,
+    pub timeout: usize,
     #[serde(rename = "maxPayloadSize")]
-    pub max_payload_size: u32,
+    pub max_payload_size: usize,
 }
 
 #[derive(Clone)]

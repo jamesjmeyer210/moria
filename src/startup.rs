@@ -30,7 +30,7 @@ macro_rules! load_json_file {
 }
 
 pub fn load_config(path: &str) -> Config {
-    return load_json_file!(path)
+    load_json_file!(path)
 }
 
 pub fn load_endpoints(path: &str) -> HashMap<String,AuthObj> {
