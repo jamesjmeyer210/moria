@@ -1,6 +1,6 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder, HttpRequest};
 use std::collections::HashMap;
-use actix_web::client::Client;
+use actix_web::client::{Client};
 use std::str;
 
 const PAYLOAD_SIZE: usize = 200_000;
@@ -70,16 +70,19 @@ async fn forward(config: web::Data<Config>, endpoints: web::Data<HashMap<String,
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
 
-    let config = load_config("config.json");
-    let auth_map= load_endpoints("endpoints.json");
+    let config = web::Data::new(load_config("config.json"));
+    let auth_map= web::Data::new(load_endpoints("endpoints.json"));
+
+    // let config = load_config("config.json");
+    // let auth_map= load_endpoints("endpoints.json");
 
     HttpServer::new(move||{
 
         let client = Client::new();
 
         App::new()
-            .data(config.clone())
-            .data(auth_map.clone())
+            .app_data(config.clone())
+            .app_data(auth_map.clone())
             .data(client)
             .data(web::PayloadConfig::new(PAYLOAD_SIZE))
             .default_service(web::route().to(forward))
