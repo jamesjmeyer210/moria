@@ -73,11 +73,11 @@ async fn main() -> std::io::Result<()> {
     let config = web::Data::new(load_config("config.json"));
     let auth_map= web::Data::new(load_endpoints("endpoints.json"));
 
-    // let config = load_config("config.json");
-    // let auth_map= load_endpoints("endpoints.json");
-
     HttpServer::new(move||{
-
+        // OPTIMIZE: Client is created locally because it cannot be safely shared between threads.
+        // It could be possible the client could be wrapped in a Mutex and accessed concurrently,
+        // but in the short term we'll have to settle on setting a limit to the max number of threads
+        // because each thread owns a client.
         let client = Client::new();
 
         App::new()
