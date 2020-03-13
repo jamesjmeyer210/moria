@@ -1,5 +1,6 @@
 # Rust ignore
 /target
+Cargo.lock
 
 # Node ignore for mock server
 node_modules
