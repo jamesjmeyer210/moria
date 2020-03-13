@@ -1,7 +1,8 @@
 {
   "jwtKeyName": "jwt-token",
   "jwtSecret": "secret",
-  "maxThreads": 0,
+  "maxConnection": 0,
+  "maxRateOfConnection": 0,
   "timeout": 10000,
   "maxPayloadSize": 200000
 }
