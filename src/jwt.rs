@@ -62,15 +62,21 @@ mod tests {
     use actix_web::test;
     use jsonwebtoken::{encode, Header, EncodingKey, Algorithm};
     use chrono::prelude::*;
-    use serde::private::ser::constrain;
+
+    fn default_config(jwt_key: &str, jwt_value: &str) -> Config {
+        Config {
+            jwt_key_name: jwt_key.to_string(),
+            jwt_secret: jwt_value.to_string(),
+            max_threads: 0,
+            timeout: 0,
+            max_payload_size: 0,
+        }
+    }
 
     #[test]
     fn validate_request_returns_ok_when_auth_groups_is_empty(){
         // Create mock objects from the internal code base
-        let conf = Config {
-            jwt_secret: "".to_string(),
-            jwt_key_name: "".to_string()
-        };
+        let conf = default_config("", "");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
@@ -86,11 +92,8 @@ mod tests {
 
     #[test]
     fn validate_request_returns_err_when_jwt_header_does_not_exist(){
-        let conf = Config {
-            jwt_secret: "".to_string(),
-            // Provide a token name that will not be found
-            jwt_key_name: "jwt-token".to_string()
-        };
+
+        let conf = default_config("jwt-token", "");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
@@ -110,10 +113,8 @@ mod tests {
 
     #[test]
     fn validate_request_returns_err_when_jwt_value_is_invalid(){
-        let conf = Config {
-            jwt_secret: "fc683cd9ed1990ca2ea10b84e5e6fba048c24929".to_string(),
-            jwt_key_name: "jwt-token".to_string()
-        };
+
+        let conf = default_config("jwt-token", "secret");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
@@ -122,7 +123,7 @@ mod tests {
             ],
         };
 
-        let req = test::TestRequest::with_header("jwt-token", "bm90IGEgand0IHRva2VuCg==")
+        let req = test::TestRequest::with_header("jwt-token", "wrong-secret")
             .to_http_request();
         let result = validate_request(&conf, &req, &auth_obj);
 
@@ -131,10 +132,8 @@ mod tests {
 
     #[test]
     fn validate_request_returns_ok_when_group_is_found(){
-        let conf = Config {
-            jwt_secret: "fc683cd9ed1990ca2ea10b84e5e6fba048c24929".to_string(),
-            jwt_key_name: "jwt-token".to_string()
-        };
+
+        let conf = default_config("jwt-token", "secret");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
@@ -160,10 +159,8 @@ mod tests {
 
     #[test]
     fn validate_request_returns_ok_when_group_is_found_in_raw_jwt(){
-        let conf = Config {
-            jwt_secret: "secret".to_string(),
-            jwt_key_name: "jwt-token".to_string()
-        };
+
+        let conf = default_config("jwt-token", "secret");
 
         let raw_jwt = format!("{}.{}.{}",
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9",
@@ -187,10 +184,8 @@ mod tests {
 
     #[test]
     fn validate_request_returns_err_when_group_is_not_found(){
-        let conf = Config {
-            jwt_secret: "fc683cd9ed1990ca2ea10b84e5e6fba048c24929".to_string(),
-            jwt_key_name: "jwt-token".to_string()
-        };
+
+        let conf = default_config("jwt-token", "secret");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),

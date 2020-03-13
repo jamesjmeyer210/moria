@@ -2,10 +2,15 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Config {
-    #[serde(rename = "JwtKeyName")]
+    #[serde(rename = "jwtKeyName")]
     pub jwt_key_name: String,
-    #[serde(rename = "JwtSecret")]
+    #[serde(rename = "jwtSecret")]
     pub jwt_secret: String,
+    #[serde(rename = "maxThreads")]
+    pub max_threads: u32,
+    pub timeout: u32,
+    #[serde(rename = "maxPayloadSize")]
+    pub max_payload_size: u32,
 }
 
 #[derive(Clone)]
