@@ -1,2 +1,9 @@
+# Rust ignore
 /target
+
+# Node ignore for mock server
 node_modules
+test/mock_server/package-lock.json
+
+# Intellij Files
+.idea
