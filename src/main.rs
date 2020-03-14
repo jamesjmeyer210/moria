@@ -1,6 +1,6 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder, HttpRequest};
 use std::collections::HashMap;
-use actix_web::client::{Client};
+use actix_web::client::{Client, ClientRequest};
 use std::str;
 
 mod model;
@@ -10,6 +10,62 @@ mod jwt;
 use crate::model::*;
 use crate::startup::{load_endpoints, load_config};
 use crate::jwt::{validate_request};
+use actix_http::{ResponseBuilder, ResponseHead};
+use std::borrow::{BorrowMut, Borrow};
+// use actix_http::http::{HeaderName, HeaderValue};
+// use actix_web::http::header::Iter;
+
+use actix_http::http;
+use actix_web::http::header;
+// fn forward_construct(
+//     iter: &mut header::Iter<(http::HeaderName, http::HeaderValue)>,
+//     forward: Option<ClientRequest>,
+//     header: Option<(http::HeaderName, http::HeaderValue)>
+// ) -> Option<ClientRequest>
+// {
+//     match header {
+//         Some(header) => {
+//             let f = forward.unwrap().set_header(header.0, (header.1.clone()));
+//             let n = iter.next();
+//             forward_construct( iter,Some(f), n )
+//         },
+//         _ => forward,
+//     }
+// }
+//
+// fn forward_construct(
+//     forward: Option<Box<ClientRequest>>,
+//     header: Option<Box<(&http::HeaderName, &http::HeaderValue)>>
+// ) -> Option<ClientRequest>
+// {
+//     match header {
+//         // header is of type Box<&(&http::HeaderName, &http::HeaderValue)>
+//         Some(header) => {
+//             let h:(&http::HeaderName, &http::HeaderValue) = header.as_ref().to_owned();
+//
+//             Some(forward.unwrap()
+//                     .set_header(h.0, h.1.clone()))
+//         },
+//         _ => None,
+//     }
+// }
+//
+// fn init_forward_request(client: &Client, req: &HttpRequest) -> Option<ClientRequest> {
+//
+//     let method = req.method();
+//     let url = format!("{}{}", req.uri().host().unwrap(), req.path());
+//
+//     let c: Box<ClientRequest> = Box::new(client.request(method.clone(), url));
+//
+//     let mut x: Option<ClientRequest> = None;
+//     req.headers().iter().map(|i| {
+//         let h = i.to_owned();
+//
+//         x = forward_construct(Some(c), Some(Box::new(h)));
+//     });
+//
+//     return x;
+// }
 
 // OPTIMIZE: Use streams and iterators for better performance.
 async fn send(client: &Client, origin: &str, req: HttpRequest, body: web::Bytes) -> HttpResponse {
@@ -17,7 +73,7 @@ async fn send(client: &Client, origin: &str, req: HttpRequest, body: web::Bytes)
     let mut forward = client.request(req.method().clone(), format!("{}{}", origin, req.path()));
 
     for header in req.headers().iter() {
-        forward = forward.set_header(header.0, header.1.as_bytes());
+         forward = forward.set_header(header.0, header.1.as_bytes());//Box::new(f.set_header(header.0, header.1.as_bytes()));
     }
 
     match forward.send_body(body).await {
@@ -29,6 +85,7 @@ async fn send(client: &Client, origin: &str, req: HttpRequest, body: web::Bytes)
 
             match response.body().await {
                 Ok(bytes) => {
+
                     response_builder.body(bytes.clone())
                 },
                 Err(error) => {
@@ -77,6 +134,7 @@ async fn main() -> std::io::Result<()> {
         // but that could lead to thread locks. In the short term we'll have to settle on setting a
         // limit to the max number of threads because each thread owns a client.
         let client = Client::new();
+        //let resp_builder = ResponseBuilder::new();
 
         App::new()
             .app_data(config.clone())
