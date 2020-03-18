@@ -77,13 +77,13 @@ async fn forward(
 async fn main() -> std::io::Result<()> {
 
     let config = web::Data::new(load_config("config.json"));
+    // OPTIMIZE: The auth map could be compressed into a smaller type than a hash map. This could
+    // potentially curb the memory growth of the application - but does not solve the leak - if it
+    // still exists.
     let auth_map= web::Data::new(load_endpoints("endpoints.json"));
 
     HttpServer::new(move||{
-        // OPTIMIZE: Client is created locally because it cannot be safely shared between threads.
-        // It could be possible the client could be wrapped in a Mutex and accessed concurrently,
-        // but that could lead to thread locks. In the short term we'll have to settle on setting a
-        // limit to the max number of threads because each thread owns a client.
+
         let client = Client::new();
 
         App::new()
