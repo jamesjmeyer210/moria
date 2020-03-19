@@ -8,7 +8,7 @@ mod startup;
 mod jwt;
 
 use crate::model::*;
-use crate::startup::{load_endpoints, load_config};
+use crate::startup::{Config, load_endpoints};
 use crate::jwt::{validate_request};
 
 async fn send(
@@ -76,7 +76,10 @@ async fn forward(
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
 
-    let config = web::Data::new(load_config("config.json"));
+    let config = web::Data::new(
+        Config::from_file("config.json")
+            .unwrap_or_else(|error|panic!("{:?}", error))
+    );
     // OPTIMIZE: The auth map could be compressed into a smaller type than a hash map. This could
     // potentially curb the memory growth of the application - but does not solve the leak - if it
     // still exists.

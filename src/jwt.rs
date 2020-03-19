@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use actix_web::HttpRequest;
 
 use crate::AuthObj;
-use crate::Config;
+use crate::startup::Config;
 
 #[derive(Serialize, Deserialize)]
 struct JwtPayload {
@@ -67,6 +67,10 @@ mod tests {
         Config {
             jwt_key_name: jwt_key.to_string(),
             jwt_secret: jwt_value.to_string(),
+            ip: "127.0.0.1".to_string(),
+            port: 8000,
+            ssl_public_key: "".to_string(),
+            ssl_private_key: "".to_string(),
             max_connection: 0,
             max_rate_of_connection: 0,
             timeout: 0,
