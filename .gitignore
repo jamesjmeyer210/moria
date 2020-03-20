@@ -2,6 +2,9 @@
 /target
 Cargo.lock
 
+# Ignore private configuration files
+/ssl
+
 # Node ignore for mock server
 node_modules
 test/mock_server/package-lock.json
