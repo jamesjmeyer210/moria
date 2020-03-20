@@ -2,11 +2,11 @@
   "jwtKeyName": "jwt-token",
   "jwtSecret": "secret",
   "ip": "127.0.0.1",
-  "port": "8000",
-  "sslPublicKey": "ssl/key.pem",
-  "sslPrivateKey": "ssl/cert.pem",
-  "maxConnection": 0,
-  "maxRateOfConnection": 0,
+  "port": 8000,
+  "sslPublicKey": "ssl/cert.pem",
+  "sslPrivateKey": "ssl/key.pem",
+  "maxConnection": 25000,
+  "maxRateOfConnection": 256,
   "timeout": 10000,
   "maxPayloadSize": 200000
 }
