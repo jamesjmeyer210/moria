@@ -1,5 +1,6 @@
 use actix_web::{web, App, Error, HttpResponse, HttpServer, Responder, HttpRequest};
 use actix_web::client::{Client};
+use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
 use std::collections::HashMap;
 use std::str;
 
@@ -10,7 +11,6 @@ mod jwt;
 use crate::model::*;
 use crate::startup::{Config, load_endpoints};
 use crate::jwt::{validate_request};
-use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
 
 async fn send(
     client: &Client,
