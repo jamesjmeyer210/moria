@@ -38,13 +38,15 @@ impl RustType {
             _ => {
                 let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}+\)").unwrap();
                 match reg_string.captures(s) {
-                    Some(_) => {
-                        // TODO: unwrap the captured value of the regex rather than `s`
+                    Some(capture) => {
+                        // Extract the selected text from captured value of the regex expression
+                        let text: &str = capture.get(0).unwrap().as_str();
+
                         let reg_usize: Regex = Regex::new(r"[1-9][0-9]{0,3}").unwrap_or_else(|error|{
                             panic!("DEBUG: Failed to instantiate reg_usize.\n{:?}", error);
                         });
 
-                        let str_usize = reg_usize.captures(s).unwrap_or_else(||{
+                        let str_usize = reg_usize.captures(text).unwrap_or_else(||{
                             panic!("DEBUG: Failed to instantiate str_usize.");
                         }).get(0).unwrap_or_else(||{
                             panic!("DEBUG: Failed to get 0th index.");
@@ -66,6 +68,7 @@ impl RustType {
 #[cfg(test)]
 mod test {
 
+    use rand::prelude::*;
     use super::RustType;
 
     #[test]
@@ -88,7 +91,10 @@ mod test {
 
     #[test]
     fn from_str_returns_string_with_size_when_given_string_of_n_size(){
-        let t = RustType::from_str("String(77)").unwrap();
-        assert_eq!(RustType::String(77), t);
+        let r: usize = rand::thread_rng().gen_range(1, 9999);
+
+        let t = RustType::from_str(&format!("String({})", r)).unwrap();
+
+        assert_eq!(RustType::String(r), t);
     }
 }
