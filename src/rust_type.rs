@@ -41,16 +41,12 @@ impl RustType {
                     Some(capture) => {
                         // Extract the selected text from captured value of the regex expression
                         let text: &str = capture.get(0).unwrap().as_str();
+                        let reg_usize: Regex = Regex::new(r"[1-9][0-9]{0,3}").unwrap();
 
-                        let reg_usize: Regex = Regex::new(r"[1-9][0-9]{0,3}").unwrap_or_else(|error|{
-                            panic!("DEBUG: Failed to instantiate reg_usize.\n{:?}", error);
-                        });
-
-                        let str_usize = reg_usize.captures(text).unwrap_or_else(||{
-                            panic!("DEBUG: Failed to instantiate str_usize.");
-                        }).get(0).unwrap_or_else(||{
-                            panic!("DEBUG: Failed to get 0th index.");
-                        }).as_str();
+                        // The bellow unwrap errors are unreachable because we cannot enter this
+                        // code block without already having a valid selection. The outer regex
+                        // rules are more strict than the internal rules.
+                        let str_usize = reg_usize.captures(text).unwrap().get(0).unwrap().as_str();
 
                         // A ParseIntError is unreachable in the blow line because we are extracting
                         // this usize after we've captured it in a regex expression.
