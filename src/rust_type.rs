@@ -19,9 +19,8 @@ enum RustType {
 }
 
 impl RustType {
-    // TODO: Should we return a Result from this function rather than an Option?
-    fn from_str(s: &str) -> Option<Self> {
 
+    fn from_str(s: &str) -> Option<Self> {
         match s {
             "bool" => Some(RustType::BOOL),
             "i8"|"sbyte" => Some(RustType::I8),
@@ -35,28 +34,30 @@ impl RustType {
             "i64"|"long" => Some(RustType::I64),
             "u64"|"ulong" => Some(RustType::U64),
             "f64"|"decimal" => Some(RustType::F64),
-            _ => {
-                let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}?\)").unwrap();
-                match reg_string.captures(s) {
-                    Some(capture) => {
-                        // Extract the selected text from captured value of the regex expression
-                        let text: &str = capture.get(0).unwrap().as_str();
-                        let reg_usize: Regex = Regex::new(r"[1-9][0-9]{0,3}").unwrap();
+            _ => RustType::extract_string(s)
+        }
+    }
 
-                        // The bellow unwrap errors are unreachable because we cannot enter this
-                        // code block without already having a valid selection. The outer regex
-                        // rules are more strict than the internal rules.
-                        let str_usize = reg_usize.captures(text).unwrap().get(0).unwrap().as_str();
+    fn extract_string(s: &str) -> Option<RustType> {
+        let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}?\)").unwrap();
+        match reg_string.captures(s) {
+            Some(capture) => {
+                // Extract the selected text from captured value of the regex expression
+                let text: &str = capture.get(0).unwrap().as_str();
+                let reg_usize: Regex = Regex::new(r"[1-9][0-9]{0,3}").unwrap();
 
-                        // A ParseIntError is unreachable in the blow line because we are extracting
-                        // this usize after we've captured it in a regex expression.
-                        let size = usize::from_str(str_usize).unwrap();
+                // The bellow unwrap errors are unreachable because we cannot enter this
+                // code block without already having a valid selection. The outer regex
+                // rules are more strict than the internal rules.
+                let str_usize = reg_usize.captures(text).unwrap().get(0).unwrap().as_str();
 
-                        Some(RustType::String(size))
-                    },
-                    _ => None
-                }
-            }
+                // A ParseIntError is unreachable in the blow line because we are extracting
+                // this usize after we've captured it in a regex expression.
+                let size = usize::from_str(str_usize).unwrap();
+
+                Some(RustType::String(size))
+            },
+            _ => None
         }
     }
 }
