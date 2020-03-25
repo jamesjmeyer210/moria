@@ -36,7 +36,7 @@ impl RustType {
             "u64"|"ulong" => Some(RustType::U64),
             "f64"|"decimal" => Some(RustType::F64),
             _ => {
-                let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}+\)").unwrap();
+                let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}?\)").unwrap();
                 match reg_string.captures(s) {
                     Some(capture) => {
                         // Extract the selected text from captured value of the regex expression
@@ -96,5 +96,14 @@ mod test {
         let t = RustType::from_str(&format!("String({})", r)).unwrap();
 
         assert_eq!(RustType::String(r), t);
+    }
+
+    #[test]
+    fn from_str_returns_none_when_string_of_n_is_too_big(){
+        let r: usize = rand::thread_rng().gen_range(10000, usize::max_value());
+
+        let t = RustType::from_str(&format!("String({})", r));
+
+        assert_eq!(true, t.is_none());
     }
 }
