@@ -50,16 +50,13 @@ impl RustType {
                             panic!("DEBUG: Failed to get 0th index.");
                         }).as_str();
 
-                        let size = usize::from_str(str_usize).unwrap_or_else(|error|{
-                            panic!("DEBUG: Failed to instantiate size.\n{:?}", error);
-                        });
+                        // A ParseIntError is unreachable in the blow line because we are extracting
+                        // this usize after we've captured it in a regex expression.
+                        let size = usize::from_str(str_usize).unwrap();
 
                         Some(RustType::String(size))
                     },
-                    None => {
-                        println!("DEBUG: No match for {}", s);
-                        None
-                    }
+                    _ => None
                 }
             }
         }
