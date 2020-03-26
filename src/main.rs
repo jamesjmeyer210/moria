@@ -4,7 +4,7 @@ use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
 use std::collections::HashMap;
 use std::str;
 
-mod rust_type;
+mod url_type;
 mod model;
 mod startup;
 mod jwt;
