@@ -20,6 +20,15 @@ impl UrlType {
         }
     }
 
+    fn get_regex_str(&self) -> &'static str {
+        match self {
+            UrlType::Bool => r"(true|false)",
+            UrlType::Integer => r"[1-9][0-9]?",
+            UrlType::Real => r"[1-9][0-9]?+\.+[0-9]",
+            UrlType::String(_) => r"/[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/",
+        }
+    }
+
     fn extract_string(s: &str) -> Option<UrlType> {
         let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}?\)").unwrap();
         match reg_string.captures(s) {
@@ -84,5 +93,13 @@ mod test {
         let t = UrlType::from_str(&format!("String({})", r));
 
         assert_eq!(true, t.is_none());
+    }
+
+    #[test]
+    fn get_regex_str_returns_string_of_any_usize(){
+        let r: usize = rand::thread_rng().gen_range(1, 9999);
+        let t = UrlType::from_str(&format!("String({})", r)).unwrap();
+
+        assert_eq!(r"/[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/", t.get_regex_str());
     }
 }
