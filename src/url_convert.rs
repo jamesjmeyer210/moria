@@ -5,7 +5,7 @@ enum ConversionError {
     UnknownType,
 }
 
-const PATH_DEFINITION: &'static str = r"[[/]([a-zA-Z0-9]+|\{+(bool|integer|real|string)+\})]+";
+const PATH_DEFINITION: &'static str = r"^[/][a-z]+([/]([a-z]+|(\{string\}|\{integer\}|\{bool\}|\{real\})))*$";
 
 fn is_valid_pattern(url: &str) -> bool {
     let reg: Regex = Regex::new(PATH_DEFINITION).unwrap();
@@ -17,12 +17,7 @@ fn is_valid_pattern(url: &str) -> bool {
         },
         None => false
     }
-
 }
-
-// fn convert(url: &String) -> Result<Regex,ConversionError> {
-//
-// }
 
 #[cfg(test)]
 mod test {
@@ -32,6 +27,18 @@ mod test {
     fn pattern_with_no_params_is_valid() {
         let path = "/api";
         assert_eq!(true, is_valid_pattern(path));
+    }
+
+    #[test]
+    fn pattern_with_no_slash_is_invalid() {
+        let path = "api";
+        assert_eq!(false, is_valid_pattern(path));
+    }
+
+    #[test]
+    fn pattern_with_ending_slash_is_invalid() {
+        let path = "/api/";
+        assert_eq!(false, is_valid_pattern(path));
     }
 
     #[test]
@@ -49,6 +56,24 @@ mod test {
     #[test]
     fn pattern_with_integer_is_valid() {
         let path = "/api/user/{integer}";
+        assert_eq!(true, is_valid_pattern(path));
+    }
+
+    #[test]
+    fn pattern_with_real_is_valid() {
+        let path = "/api/temperature/{real}";
+        assert_eq!(true, is_valid_pattern(path));
+    }
+
+    #[test]
+    fn pattern_with_string_is_valid() {
+        let path = "/search/{string}";
+        assert_eq!(true, is_valid_pattern(path));
+    }
+
+    #[test]
+    fn pattern_with_many_url_types_is_valid() {
+        let path = "/types/{bool}/{integer}/{real}/{string}";
         assert_eq!(true, is_valid_pattern(path));
     }
 }
