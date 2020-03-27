@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::str;
 
 mod url_type;
+mod url_map;
 mod model;
 mod startup;
 mod jwt;
