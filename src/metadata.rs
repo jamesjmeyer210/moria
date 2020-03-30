@@ -1,12 +1,12 @@
 #[derive(Clone)]
-pub struct AuthObj {
+pub struct MetaData {
     pub origin: String,
     pub groups: Vec<String>,
 }
 
-impl AuthObj {
+impl MetaData {
     pub fn new(o: String, g: Vec<String>) -> Self {
-        AuthObj {
+        MetaData {
             origin: o,
             groups: g,
         }
