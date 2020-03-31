@@ -1,10 +1,5 @@
 use std::collections::HashMap;
-use actix_web::http::Method;
-use actix_web::HttpRequest;
-
-use crate::url::MetaData;
-use crate::url::Domain;
-use crate::util;
+use crate::url::{Domain, MetaData};
 use crate::app::load_domains;
 
 #[derive(Clone)]

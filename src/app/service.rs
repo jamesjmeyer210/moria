@@ -1,12 +1,9 @@
-use actix_web::{web, App, Error, HttpResponse, HttpServer, Responder, HttpRequest};
+use actix_web::{web, Error, HttpResponse, Responder, HttpRequest};
 use actix_web::client::{Client};
 use actix_http::http::Method;
-use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
-use std::collections::HashMap;
 use std::str;
 
 use crate::app::Config;
-use crate::url::MetaData;
 use crate::util::jwt::{validate_request};
 use crate::url::static_map::StaticMap;
 
