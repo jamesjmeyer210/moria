@@ -24,13 +24,17 @@ impl <T>UniqueVec<T> where T : PartialEq {
         }
     }
 
-    pub fn push(&mut self, elem: T) {
+    pub fn push(&mut self, elem: T) -> usize {
         if !self.data.contains(&elem) {
             self.data.push(elem);
+            self.data.len()
+        }
+        else {
+            self.index_of(&elem).unwrap()
         }
     }
 
-    pub fn index_of(&self, target: &T) -> Option<usize> {
+    fn index_of(&self, target: &T) -> Option<usize> {
         let mut i: usize = 0;
         for elem in self.data.iter() {
             if elem == target {
