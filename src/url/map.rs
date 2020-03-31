@@ -85,8 +85,10 @@ impl UrlMap {
                             ).unwrap()
                         }));
                     }
-                    // TODO: get rid of this panic here, by passing an error back up the call stack
-                    panic!("Illegal url sub-path: {}", sub_path);
+                    else {
+                        // TODO: get rid of this panic here, by passing an error back up the call stack
+                        panic!("Illegal url sub-path: {}", sub_path);
+                    }
                 }
             }
         }
