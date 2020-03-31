@@ -42,7 +42,7 @@ impl <T>UniqueVec<T> where T : PartialEq {
     pub fn push(&mut self, elem: T) -> usize {
         if !self.data.contains(&elem) {
             self.data.push(elem);
-            self.data.len()
+            self.data.len() - 1
         }
         else {
             self.index_of(&elem).unwrap()
@@ -88,6 +88,13 @@ mod test {
         assert_eq!("Alice".to_string(), unique_names.get(0).unwrap().to_string());
         assert_eq!("Bob".to_string(), unique_names.get(1).unwrap().to_string());
         assert_eq!("Charlie".to_string(), unique_names.get(2).unwrap().to_string());
+    }
+
+    #[test]
+    fn push_returns_index_of_zero_on_first_push() {
+        let mut unique = UniqueVec::new();
+        let index = unique.push("first");
+        assert_eq!(0, index);
     }
 
     #[test]
