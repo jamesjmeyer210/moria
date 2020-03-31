@@ -66,31 +66,7 @@ impl UrlMap {
     fn from_file(path: &str) -> Self {
         let domains = app::load_domains(path);
 
-        let mut origins = UniqueVec::with_capacity(domains.len());
-        let mut groups = UniqueVec::new();
-        let mut methods = UniqueVec::new();
-        let mut metadata = Vec::new();
-
-        for domain in domains.iter() {
-            // add only the unique origins
-            let o = origins.push(domain.origin.clone());
-
-            for endpoint in domain.endpoints.iter() {
-                // add only the unique groups and store their indexes
-                let mut g = Vec::with_capacity(endpoint.groups.len());
-                for group in endpoint.groups.iter() {
-                    g.push( groups.push(group.clone()));
-                }
-                // add only a method if it is unique
-                let m = methods.push(endpoint.method.clone());
-
-                metadata.push(MetaDataRef {
-                    method: m,
-                    origin: o,
-                    groups: g,
-                });
-            }
-        }
+        let meta = UrlMap::init_meta(&domains);
 
         // TODO: instantiate the map and the urls within
         let mut map: Vec<UniqueVec<Either<String,UrlRegex>>> = Vec::new();
@@ -126,11 +102,11 @@ impl UrlMap {
         }
 
         UrlMap {
-            groups: groups.to_vec(),
-            origins: origins.to_vec(),
-            methods: methods.to_vec(),
+            groups: meta.0,
+            origins: meta.1,
+            methods: meta.2,
             map: Vec::new(), // TODO: convert the map to the proper type and store it here
-            metadata,
+            metadata: meta.3,
             urls: Vec::new(), // TODO: store the urls here
         }
     }
