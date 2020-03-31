@@ -1,3 +1,4 @@
+#[derive(PartialEq)]
 pub enum Either <A,B> {
     This(A),
     That(B),
