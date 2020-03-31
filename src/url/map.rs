@@ -75,10 +75,10 @@ impl UrlMap {
                     }
 
                     if static_sub_path.captures(sub_path).is_some() {
-                        map.get(i).unwrap().push(Either::This(sub_path.to_string()));
+                        map.get_mut(i).unwrap().push(Either::This(sub_path.to_string()));
                     }
                     else if dynamic_sub_path.captures(sub_path).is_some() {
-                        map.get(i).unwrap().push(Either::That(UrlRegex {
+                        map.get_mut(i).unwrap().push(Either::That(UrlRegex {
                             expr: Regex::from_str(
                                 UrlType::from_str(sub_path).unwrap().get_regex_str()
                             ).unwrap()
