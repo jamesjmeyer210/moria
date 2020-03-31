@@ -1,20 +1,30 @@
 use std::collections::HashMap;
 use actix_web::http::Method;
-use crate::url::metadata::MetaData;
+use actix_web::HttpRequest;
 
-struct StaticMap {
-    endpoints: HashMap<String,MetaData>,
+use crate::url::MetaData;
+use crate::url::Domain;
+use crate::util;
+use crate::app::load_domains;
+
+#[derive(Clone)]
+pub struct StaticMap {
+    pub endpoints: HashMap<String,MetaData>,
 }
 
 impl StaticMap {
 
-    fn from(values: Vec<Domain>) -> StaticMap {
+    pub fn from_file(path: &str) -> StaticMap {
+        StaticMap::from_domains(load_domains(path))
+    }
+
+    fn from_domains(domains: Vec<Domain>) -> StaticMap {
         let mut map: HashMap<String,MetaData> = HashMap::new();
 
         for domain in domains {
             for endpoint in domain.endpoints {
                 let key = format!("{} {}", endpoint.method, &endpoint.path);
-                map.insert(key, AuthObj::new(
+                map.insert(key, MetaData::new(
                     domain.origin.clone(),
                     endpoint.groups,
                 ));
@@ -26,7 +36,7 @@ impl StaticMap {
         }
     }
 
-    fn get(&self, method: &Method, url: &str) -> Option<Metadat> {
+    pub fn get(&self, req: HttpRequest) -> Option<&MetaData> {
         let lookup = format!("{} {}", req.method(), req.path());
         self.endpoints.get(&lookup)
     }

@@ -3,8 +3,8 @@ use jsonwebtoken::errors::ErrorKind;
 use serde::{Serialize, Deserialize};
 use actix_web::HttpRequest;
 
-use crate::AuthObj;
-use crate::startup::Config;
+use crate::app::Config;
+use crate::url::MetaData;
 
 #[derive(Serialize, Deserialize)]
 struct JwtPayload {
@@ -20,8 +20,8 @@ pub enum HeaderError {
 }
 
 // TODO: clean up this method so it doesn't have so many nested match blocks
-pub fn validate_request(conf: &Config, req: &HttpRequest, auth_obj: &AuthObj) -> Result<(),HeaderError> {
-    // If the AuthObject for the endpoint in question does not have any defined groups, no authentication
+pub fn validate_request(conf: &Config, req: &HttpRequest, auth_obj: &MetaData) -> Result<(),HeaderError> {
+    // If the MetaData for the endpoint in question does not have any defined groups, no authentication
     // is required because none has been defined.
     if auth_obj.groups.is_empty(){
         return Ok(());
@@ -43,7 +43,7 @@ pub fn validate_request(conf: &Config, req: &HttpRequest, auth_obj: &AuthObj) ->
     }
     // Extract the user from the token data
     let user = token_data.unwrap();
-    // If there is one matching group between the user and the groups defined in the AuthObject, the
+    // If there is one matching group between the user and the groups defined in the MetaData, the
     // user belongs to a valid group to access this endpoint.
     for group in user.claims.groups.iter() {
         if auth_obj.groups.contains(group) {
@@ -83,7 +83,7 @@ mod tests {
         // Create mock objects from the internal code base
         let conf = default_config("", "");
 
-        let auth_obj = AuthObj {
+        let auth_obj = MetaData {
             origin: "".to_string(),
             groups: vec![],
         };
@@ -100,7 +100,7 @@ mod tests {
 
         let conf = default_config("jwt-token", "");
 
-        let auth_obj = AuthObj {
+        let auth_obj = MetaData {
             origin: "".to_string(),
             // Provide at lease one group so we can get past the first check
             groups: vec![
@@ -121,7 +121,7 @@ mod tests {
 
         let conf = default_config("jwt-token", "secret");
 
-        let auth_obj = AuthObj {
+        let auth_obj = MetaData {
             origin: "".to_string(),
             groups: vec![
                 "users".to_string()
@@ -140,7 +140,7 @@ mod tests {
 
         let conf = default_config("jwt-token", "secret");
 
-        let auth_obj = AuthObj {
+        let auth_obj = MetaData {
             origin: "".to_string(),
             groups: vec!["users".to_string()],
         };
@@ -173,7 +173,7 @@ mod tests {
             "8LGHRBirzKJPP4xhbyvIRLO-B7wMpUzJrOWgub4zASs"
         );
 
-        let auth_obj = AuthObj {
+        let auth_obj = MetaData {
             origin: "".to_string(),
             groups: vec![
                 "users".to_string()
@@ -192,7 +192,7 @@ mod tests {
 
         let conf = default_config("jwt-token", "secret");
 
-        let auth_obj = AuthObj {
+        let auth_obj = MetaData {
             origin: "".to_string(),
             groups: vec!["developers".to_string()],
         };
