@@ -7,7 +7,9 @@ use crate::util::{UniqueVec, UrlRegex};
 use std::borrow::Borrow;
 use crate::url::url_type::UrlType;
 use std::str::FromStr;
+use crate::url::Domain;
 
+#[derive(Debug, PartialEq)]
 struct MetaDataRef {
     method: usize,
     origin: usize,
@@ -29,6 +31,36 @@ pub struct UrlMap {
 }
 
 impl UrlMap {
+
+    fn init_meta(domains: &Vec<Domain>) -> (Vec<String>, Vec<String>, Vec<String>, Vec<MetaDataRef>) {
+        let mut origins = UniqueVec::with_capacity(domains.len());
+        let mut groups = UniqueVec::new();
+        let mut methods = UniqueVec::new();
+        let mut metadata = Vec::new();
+
+        for domain in domains.iter() {
+            // add only the unique origins
+            let o = origins.push(domain.origin.clone());
+
+            for endpoint in domain.endpoints.iter() {
+                // add only the unique groups and store their indexes
+                let mut g = Vec::with_capacity(endpoint.groups.len());
+                for group in endpoint.groups.iter() {
+                    g.push( groups.push(group.clone()));
+                }
+                // add only a method if it is unique
+                let m = methods.push(endpoint.method.clone());
+
+                metadata.push(MetaDataRef {
+                    method: m,
+                    origin: o,
+                    groups: g,
+                });
+            }
+        }
+        // TODO: trim these vecs before returning them to ensure optimal compression
+        (origins.to_vec(), groups.to_vec(), methods.to_vec(), metadata)
+    }
 
     // TODO: break apart this function into sub-function and test them individually
     fn from_file(path: &str) -> Self {
@@ -150,4 +182,75 @@ impl UrlMap {
     //     }
     //     at
     // }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+    use crate::url::Endpoint;
+
+    #[test]
+    fn init_meta_returns_tuple_when_passed_proper_collection() {
+        let domains = vec![
+            Domain {
+                origin: "first-origin".to_string(),
+                endpoints: vec![
+                    Endpoint {
+                        path: "/foo".to_string(),
+                        method: "GET".to_string(),
+                        groups: vec!["foos".to_string()]
+                    },
+                    Endpoint {
+                        path: "/bar".to_string(),
+                        method: "POST".to_string(),
+                        groups: vec!["bars".to_string()]
+                    }
+                ]
+            },
+            Domain {
+                origin: "second-origin".to_string(),
+                endpoints: vec![
+                    Endpoint {
+                        path: "/another-foo".to_string(),
+                        method: "GET".to_string(),
+                        groups: vec!["foos".to_string()]
+                    },
+                    Endpoint {
+                        path: "/another-bar".to_string(),
+                        method: "POST".to_string(),
+                        groups: vec!["bars".to_string()]
+                    }
+                ]
+            }
+        ];
+
+        let meta = UrlMap::init_meta(&domains);
+
+        let expected_orgins = vec![
+            "first-origin".to_string(),
+            "second-origin".to_string()
+        ];
+        assert_eq!(expected_orgins, meta.0);
+
+        let expected_groups = vec![
+            "foos".to_string(),
+            "bars".to_string(),
+        ];
+        assert_eq!(expected_groups, meta.1);
+
+        let expected_methods = vec![
+            "GET".to_string(),
+            "POST".to_string(),
+        ];
+        assert_eq!(expected_methods, meta.2);
+
+        let expected_metadata = vec![
+            MetaDataRef { method: 0, origin: 0, groups: vec![0] },
+            MetaDataRef { method: 1, origin: 0, groups: vec![1] },
+            MetaDataRef { method: 0, origin: 1, groups: vec![0] },
+            MetaDataRef { method: 1, origin: 1, groups: vec![1] },
+        ];
+        assert_eq!(expected_metadata, meta.3);
+    }
 }
