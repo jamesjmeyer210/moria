@@ -6,9 +6,9 @@ mod app;
 mod url;
 mod util;
 
-use crate::app::{load_domains, Config};
+use crate::app::{Config};
+use crate::url::static_map::{StaticMap};
 use crate::app::service::{forward};
-use crate::url::static_map::StaticMap;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
