@@ -30,6 +30,17 @@ impl <T>UniqueVec<T> where T : PartialEq {
         }
     }
 
+    pub fn index_of(&self, target: &T) -> Option<usize> {
+        let mut i: usize = 0;
+        for elem in self.data.iter() {
+            if elem == target {
+                return Some(i);
+            }
+            i+=1;
+        }
+        None
+    }
+
     pub fn to_vec(self) -> Vec<T> {
         self.data
     }
@@ -60,4 +71,20 @@ mod test {
         assert_eq!("Charlie".to_string(), unique_names.get(2).unwrap().to_string());
     }
 
+    #[test]
+    fn index_of_returns_unique_index_when_element_exists() {
+        let names = vec![
+            "Alice", "Bob", "Bob", "Charlie"
+        ];
+
+        let mut unique_names = UniqueVec::new();
+
+        for name in names {
+            unique_names.push(name);
+        }
+
+        assert_eq!(0, unique_names.index_of(&"Alice").unwrap());
+        assert_eq!(1, unique_names.index_of(&"Bob").unwrap());
+        assert_eq!(2, unique_names.index_of(&"Charlie").unwrap());
+    }
 }
