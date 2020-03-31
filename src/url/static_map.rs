@@ -36,9 +36,8 @@ impl StaticMap {
         }
     }
 
-    pub fn get(&self, req: HttpRequest) -> Option<&MetaData> {
-        let lookup = format!("{} {}", req.method(), req.path());
-        self.endpoints.get(&lookup)
+    pub fn get(&self, target: &str) -> Option<&MetaData> {
+        self.endpoints.get(&target.to_string())
     }
 
 }

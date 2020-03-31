@@ -8,6 +8,7 @@ use std::str;
 use crate::app::Config;
 use crate::url::MetaData;
 use crate::util::jwt::{validate_request};
+use crate::url::static_map::StaticMap;
 
 async fn send(
     client: &Client,
@@ -41,7 +42,7 @@ async fn send(
 
 pub async fn forward(
     config: web::Data<Config>,
-    endpoints: web::Data<HashMap<String,MetaData>>,
+    endpoints: web::Data<StaticMap>,
     client: web::Data<Client>,
     req: HttpRequest,
     body: web::Bytes
