@@ -22,51 +22,102 @@ struct UrlRef {
 }
 
 pub struct UrlMap {
+    // These items to the next comment are built from init_origins_groups_methods_metadata(...)
     groups: Vec<String>,
     origins: Vec<String>,
     methods: Vec<String>,
-    map: Vec<Vec<Either<String,UrlRegex>>>,
     metadata: Vec<MetaDataRef>,
+    // The below items are built via init_map_url(...)
+    map: Vec<Vec<Either<String,UrlRegex>>>,
     urls: Vec<UrlRef>,
 }
 
 impl UrlMap {
 
-    fn init_meta(domains: &Vec<Domain>) -> (Vec<String>, Vec<String>, Vec<String>, Vec<MetaDataRef>) {
+    fn init_origins_groups_methods_metadata(domains: &Vec<Domain>)
+        -> (Vec<String>, Vec<String>, Vec<String>, Vec<MetaDataRef>)
+    {
         let mut origins = UniqueVec::with_capacity(domains.len());
         let mut groups = UniqueVec::new();
         let mut methods = UniqueVec::new();
         let mut metadata = Vec::new();
 
         for domain in domains.iter() {
-            // add only the unique origins
+            // add only the unique origins to the variable `o`
             let o = origins.push(domain.origin.clone());
 
             for endpoint in domain.endpoints.iter() {
-                // add only the unique groups and store their indexes
+                // add only the unique groups and store their indexes to the sequence, `g`
                 let mut g = Vec::with_capacity(endpoint.groups.len());
                 for group in endpoint.groups.iter() {
                     g.push( groups.push(group.clone()));
                 }
                 // add only a method if it is unique
                 let m = methods.push(endpoint.method.clone());
-
-                metadata.push(MetaDataRef {
-                    method: m,
-                    origin: o,
-                    groups: g,
-                });
+                metadata.push(MetaDataRef { method: m, origin: o, groups: g, });
             }
         }
         // TODO: trim these vecs before returning them to ensure optimal compression
         (origins.to_vec(), groups.to_vec(), methods.to_vec(), metadata)
     }
 
+    fn init_map_url(domains: &Vec<Domain>) -> (Vec<Vec<Either<String,UrlRegex>>>, Vec<UrlRef>) {
+        // TODO: instantiate the map and the urls within
+        let mut map: Vec<UniqueVec<Either<String,UrlRegex>>> = Vec::new();
+        let static_sub_path = Regex::new(r"[a-zA-Z0-9]").unwrap();
+        let dynamic_sub_path = Regex::new(r"(\{string\}|\{integer\}|\{bool\}|\{real\})").unwrap();
+
+        let mut count: (usize, usize) = (0, 0);
+
+
+        for domain in domains.iter() {
+            for endpoint in domain.endpoints.iter() {
+                let mut i: usize = 0;
+                for sub_path in endpoint.path.clone().split("/") {
+                    // If we have iterated to a point that has not yet been reached, we'll add a
+                    // new UniqueVec to our map
+                    if map.len() - 1 < i {
+                        map.push(UniqueVec::new());
+                    }
+
+                    if static_sub_path.captures(sub_path).is_some() {
+                        map.get_mut(i).unwrap().push(Either::This(sub_path.to_string()));
+                    }
+                    else if dynamic_sub_path.captures(sub_path).is_some() {
+                        map.get_mut(i).unwrap().push(Either::That(UrlRegex {
+                            expr: Regex::from_str(
+                                UrlType::from_str(sub_path).unwrap().get_regex_str()
+                            ).unwrap()
+                        }));
+                    }
+                    else {
+                        // TODO: get rid of this panic here, by passing an error back up the call stack
+                        panic!("Illegal url sub-path: {}", sub_path);
+                    }
+
+                    i += 1;
+                    count.1 += 1;
+                }
+                count.0 += 1;
+            }
+        }
+
+        // TODO: instantiate these values
+        let mut paths: Vec<Vec<Either<String,UrlRegex>>> = Vec::with_capacity(count.0);
+        for i in 0..count.0 {
+            paths.push(Vec::new());
+        }
+
+        let mut urls: Vec<UrlRef> = Vec::with_capacity(count.1);
+
+        (paths, urls)
+    }
+
     // TODO: break apart this function into sub-function and test them individually
     fn from_file(path: &str) -> Self {
         let domains = app::load_domains(path);
 
-        let meta = UrlMap::init_meta(&domains);
+        let meta = UrlMap::init_origins_groups_methods_metadata(&domains);
 
         // TODO: instantiate the map and the urls within
         let mut map: Vec<UniqueVec<Either<String,UrlRegex>>> = Vec::new();
@@ -201,7 +252,7 @@ mod test {
             }
         ];
 
-        let meta = UrlMap::init_meta(&domains);
+        let meta = UrlMap::init_origins_groups_methods_metadata(&domains);
 
         let expected_orgins = vec![
             "first-origin".to_string(),
