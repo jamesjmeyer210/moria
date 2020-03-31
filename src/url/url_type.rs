@@ -43,16 +43,19 @@ mod test {
         assert_eq!(UrlType::Bool, t);
     }
 
+    #[test]
     fn from_str_returns_integer_when_given_integer() {
         let t = UrlType::from_str("{integer}").unwrap();
         assert_eq!(UrlType::Integer, t);
     }
 
+    #[test]
     fn from_str_returns_real_when_given_real() {
         let t = UrlType::from_str("{real}").unwrap();
         assert_eq!(UrlType::Real, t);
     }
 
+    #[test]
     fn from_str_returns_string_when_given_string(){
         let t = UrlType::from_str("{string}").unwrap();
         assert_eq!(UrlType::String, t);
