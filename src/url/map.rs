@@ -30,6 +30,7 @@ pub struct UrlMap {
 
 impl UrlMap {
 
+    // TODO: break apart this function into sub-function and test them individually
     fn from_file(path: &str) -> Self {
         let domains = app::load_domains(path);
 
@@ -94,12 +95,13 @@ impl UrlMap {
             groups: groups.to_vec(),
             origins: origins.to_vec(),
             methods: methods.to_vec(),
-            map: Vec::new(),
+            map: Vec::new(), // TODO: convert the map to the proper type and store it here
             metadata,
-            urls: Vec::new(),
+            urls: Vec::new(), // TODO: store the urls here
         }
     }
 
+    // TODO: this algorithm needs to be changed to do the static pass first and the dynamic pass second
     fn find_in_vec(vec: &Vec<Either<String,Regex>>, target: &str) -> Option<usize> {
         let mut i: usize = 0;
         for either in vec {
@@ -124,6 +126,7 @@ impl UrlMap {
         None
     }
 
+    // TODO: re-implement this method with the finalized structures if needed
     // fn get(&self, target: (usize,usize)) -> Either<String,Regex> {
     //     let index_of: Either<String,Regex> = match self.map.get(target.0) {
     //         Either::This(a) => Either::This(a),
@@ -132,6 +135,7 @@ impl UrlMap {
     //     Either::None
     // }
 
+    // TODO: re-implement this method with the finalized structures if needed
     // fn find(&self, taget: Vec<&str>) -> Vec<(usize,usize)> {
     //     let mut x =  0;
     //     let mut at: Vec<(usize,usize)> = Vec::new();
