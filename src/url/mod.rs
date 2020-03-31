@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 
+pub mod url_type;
 pub mod static_map;
 
 #[derive(Clone)]

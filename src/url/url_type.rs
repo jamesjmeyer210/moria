@@ -2,7 +2,7 @@ use regex::Regex;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
-enum UrlType {
+pub enum UrlType {
     Bool,
     Integer,
     Real,
@@ -11,7 +11,7 @@ enum UrlType {
 
 impl UrlType {
 
-    fn from_str(s: &str) -> Option<Self> {
+    pub fn from_str(s: &str) -> Option<Self> {
         match s {
             "bool" => Some(UrlType::Bool),
             "integer" => Some(UrlType::Integer),
@@ -20,7 +20,7 @@ impl UrlType {
         }
     }
 
-    fn get_regex_str(&self) -> &'static str {
+    pub fn get_regex_str(&self) -> &'static str {
         match self {
             UrlType::Bool => r"(true|false)",
             UrlType::Integer => r"[1-9][0-9]?",
@@ -29,7 +29,7 @@ impl UrlType {
         }
     }
 
-    fn extract_string(s: &str) -> Option<UrlType> {
+    pub fn extract_string(s: &str) -> Option<UrlType> {
         let reg_string: Regex = Regex::new(r"(S|s)+tring+\(+[1-9][0-9]{0,3}?\)").unwrap();
         match reg_string.captures(s) {
             Some(capture) => {
