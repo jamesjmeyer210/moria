@@ -1,6 +1,6 @@
 use regex::Regex;
 
-enum ConversionError {
+pub enum ConversionError {
     InvalidPattern,
     UnknownType,
 }

@@ -7,7 +7,9 @@ use crate::util::{UniqueVec, UrlRegex};
 use std::borrow::Borrow;
 use crate::url::url_type::UrlType;
 use std::str::FromStr;
+use std::str::Split;
 use crate::url::Domain;
+use crate::url::convert::ConversionError;
 
 #[derive(Debug, PartialEq)]
 struct MetaDataRef {
@@ -16,8 +18,10 @@ struct MetaDataRef {
     groups: Vec<usize>,
 }
 
+type PathRef = Vec<(usize,usize)>;
+
 struct UrlRef {
-    path: Vec<usize>,
+    path: PathRef,
     metadata: usize,
 }
 
@@ -62,6 +66,49 @@ impl UrlMap {
         }
         // TODO: trim these vecs before returning them to ensure optimal compression
         (origins.to_vec(), groups.to_vec(), methods.to_vec(), metadata)
+    }
+
+    fn add_path(map: &mut Vec<UniqueVec<Either<String,UrlRegex>>>, path: &str, static_path: &Regex, dynamic_path: &Regex)
+        -> Result<PathRef, ConversionError>
+    {
+        let sub_paths: Vec<&str> = path.split("/").collect();
+        let mut path_ref: PathRef = Vec::with_capacity(sub_paths.len());
+
+        for i in 0..sub_paths.len() {
+            if map.len() - 1 < i {
+                map.push(UniqueVec::new());
+            }
+
+            // TODO: consolidate these two match blocks into a single block
+            let either: Either<&str, &str> = match static_path.captures(sub_paths.get(i).unwrap()) {
+                Some(static_sub_path) => Either::This(static_sub_path.get(i).unwrap().as_str()),
+                None => match dynamic_path.captures(sub_paths.get(i).unwrap()) {
+                    Some(dynamic_sub_path) => Either::That(dynamic_sub_path.get(i).unwrap().as_str()),
+                    None => Either::None,
+                }
+            };
+
+            match either {
+                Either::This(static_sub_path) => {
+                    let j = map.get_mut(i).unwrap().push(Either::This(static_sub_path.to_string()));
+                    path_ref.push((i, j));
+                },
+                Either::That(dynamic_sub_path) => {
+                    let j = map.get_mut(i).unwrap().push(
+                        Either::That(UrlRegex{
+                            expr: Regex::from_str(
+                                UrlType::from_str(dynamic_sub_path)
+                                    .unwrap()
+                                    .get_regex_str()
+                            ).unwrap()
+                        })
+                    );
+                },
+                Either::None => return Err(ConversionError::UnknownType)
+            }
+        }
+
+        Ok(path_ref)
     }
 
     fn init_map_url(domains: &Vec<Domain>) -> (Vec<Vec<Either<String,UrlRegex>>>, Vec<UrlRef>) {
