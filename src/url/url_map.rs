@@ -120,47 +120,16 @@ impl UrlMap {
         let domains = app::load_domains(path);
 
         let meta = UrlMap::init_origins_groups_methods_metadata(&domains);
-
         // TODO: instantiate the map and the urls within
-        let mut map: Vec<UniqueVec<Either<String,UrlRegex>>> = Vec::new();
-        let static_sub_path = Regex::new(r"[a-zA-Z0-9]").unwrap();
-        let dynamic_sub_path = Regex::new(r"(\{string\}|\{integer\}|\{bool\}|\{real\})").unwrap();
-
-        for domain in domains.iter() {
-            for endpoint in domain.endpoints.iter() {
-                let mut i: usize = 0;
-                for sub_path in endpoint.path.clone().split("/") {
-                    // If we have iterated to a point that has not yet been reached, we'll add a
-                    // new UniqueVec to our map
-                    if map.len() < i {
-                        map.push(UniqueVec::new());
-                    }
-
-                    if static_sub_path.captures(sub_path).is_some() {
-                        map.get_mut(i).unwrap().push(Either::This(sub_path.to_string()));
-                    }
-                    else if dynamic_sub_path.captures(sub_path).is_some() {
-                        map.get_mut(i).unwrap().push(Either::That(UrlRegex {
-                            expr: Regex::from_str(
-                                UrlType::from_str(sub_path).unwrap().get_regex_str()
-                            ).unwrap()
-                        }));
-                    }
-                    else {
-                        // TODO: get rid of this panic here, by passing an error back up the call stack
-                        panic!("Illegal url sub-path: {}", sub_path);
-                    }
-                }
-            }
-        }
+        let map_and_url = UrlMap::init_map_url(&domains);
 
         UrlMap {
             groups: meta.0,
             origins: meta.1,
             methods: meta.2,
             metadata: meta.3,
-            map: Vec::new(), // TODO: convert the map to the proper type and store it here
-            urls: Vec::new(), // TODO: store the urls here
+            map: map_and_url.0,
+            urls: map_and_url.1,
         }
     }
 
