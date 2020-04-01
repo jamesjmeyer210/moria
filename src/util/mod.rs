@@ -6,6 +6,9 @@ use regex::Regex;
 pub mod either;
 pub mod jwt;
 
+mod pattern;
+pub type Pattern<T> = pattern::Pattern<T>;
+
 mod url_regex;
 pub type UrlRegex = url_regex::UrlRegex;
 

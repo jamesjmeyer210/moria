@@ -60,27 +60,3 @@ impl PartialEq for UrlRegex {
         !self.eq(other)
     }
 }
-
-#[cfg(test)]
-mod test {
-    use crate::util::url_regex::{UrlRegex, EqStr};
-    use std::str::FromStr;
-
-    #[test]
-    fn eq_str_returns_true_if_regex_captures() {
-        let r = UrlRegex::from_str(r"[a-z]+").unwrap();
-        assert_eq!(true, r.eq_str("alice"))
-    }
-
-    #[test]
-    fn eq_str_returns_true_if_regex_captures_complex(){
-        let r = UrlRegex::from_str(r"[a-zA-Z0-9]+").unwrap();
-        assert_eq!(true, r.eq_str("Al1c3"));
-    }
-
-    #[test]
-    fn eq_str_returns_false_if_regex_captures_not_exact(){
-        let r = UrlRegex::from_str(r"[a-zA-Z0-9]+").unwrap();
-        assert_eq!(false, r.eq_str("Al1c3_B0b"));
-    }
-}
