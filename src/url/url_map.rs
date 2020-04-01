@@ -157,29 +157,6 @@ impl UrlMap {
         }
         None
     }
-
-    // TODO: re-implement this method with the finalized structures if needed
-    // fn get(&self, target: (usize,usize)) -> Either<String,Regex> {
-    //     let index_of: Either<String,Regex> = match self.map.get(target.0) {
-    //         Either::This(a) => Either::This(a),
-    //         _ => Either::None,
-    //     };
-    //     Either::None
-    // }
-
-    // TODO: re-implement this method with the finalized structures if needed
-    // fn find(&self, taget: Vec<&str>) -> Vec<(usize,usize)> {
-    //     let mut x =  0;
-    //     let mut at: Vec<(usize,usize)> = Vec::new();
-    //
-    //     for iter in self.map.iter() {
-    //         match UrlMap::find_in_vec(i, taget.get(i).unwrap()) {
-    //             Some(y) => at.push((x,y)),
-    //             _ => (),
-    //         }
-    //     }
-    //     at
-    // }
 }
 
 #[cfg(test)]
