@@ -68,8 +68,10 @@ impl UrlMap {
         (origins.to_vec(), groups.to_vec(), methods.to_vec(), metadata)
     }
 
-    fn add_path(map: &mut Vec<UniqueVec<Either<String,UrlRegex>>>, path: &str, static_path: &Regex, dynamic_path: &Regex)
-        -> Result<PathRef, ConversionError>
+    fn add_path(map: &mut Vec<UniqueVec<Either<String,UrlRegex>>>
+                , path: &str
+                , static_path: &Regex
+                , dynamic_path: &Regex) -> Result<PathRef, ConversionError>
     {
         let sub_paths: Vec<&str> = path.split("/").collect();
         let mut path_ref: PathRef = Vec::with_capacity(sub_paths.len());
@@ -80,31 +82,36 @@ impl UrlMap {
             }
 
             // TODO: consolidate these two match blocks into a single block
-            let either: Either<&str, &str> = match static_path.captures(sub_paths.get(i).unwrap()) {
-                Some(static_sub_path) => Either::This(static_sub_path.get(i).unwrap().as_str()),
-                None => match dynamic_path.captures(sub_paths.get(i).unwrap()) {
-                    Some(dynamic_sub_path) => Either::That(dynamic_sub_path.get(i).unwrap().as_str()),
-                    None => Either::None,
-                }
-            };
+            match static_path.captures(sub_paths.get(i).unwrap()) {
+                Some(static_sub_path) => {
+                    // TODO: looks like this code belongs in UrlRegex
+                    let static_sub_path = static_sub_path.get(0)
+                        .unwrap()
+                        .as_str();
 
-            match either {
-                Either::This(static_sub_path) => {
-                    let j = map.get_mut(i).unwrap().push(Either::This(static_sub_path.to_string()));
+                    let j = map.get_mut(i)
+                        .unwrap()
+                        .push(Either::This(static_sub_path.to_string()));
                     path_ref.push((i, j));
                 },
-                Either::That(dynamic_sub_path) => {
-                    let j = map.get_mut(i).unwrap().push(
-                        Either::That(UrlRegex{
-                            expr: Regex::from_str(
-                                UrlType::from_str(dynamic_sub_path)
-                                    .unwrap()
-                                    .get_regex_str()
-                            ).unwrap()
-                        })
-                    );
-                },
-                Either::None => return Err(ConversionError::UnknownType)
+                None => match dynamic_path.captures(sub_paths.get(i).unwrap()) {
+                    Some(dynamic_sub_path) => {
+                        // TODO: looks like this code belongs in the UrlRegex
+                        let dynamic_sub_path = dynamic_sub_path.get(0)
+                            .unwrap()
+                            .as_str();
+                        let expr = UrlType::from_str(dynamic_sub_path)
+                            .unwrap()
+                            .get_regex_str();
+                        let expr = Regex::from_str(expr).unwrap();
+
+                        let j = map.get_mut(i)
+                            .unwrap()
+                            .push(Either::That(UrlRegex{ expr, }));
+                        path_ref.push((i, j));
+                    },
+                    None => return Err(ConversionError::UnknownType),
+                }
             }
         }
 
@@ -253,4 +260,9 @@ mod test {
         ];
         assert_eq!(expected_metadata, meta.3);
     }
+
+    // #[test]
+    // fn add_path_returns_path_ref_of_ones_when_uninitialized() {
+    //     let map: Vec<UniqueVec<Either<String,UrlRegex>>> = Vec::new();
+    // }
 }
