@@ -1,21 +1,17 @@
 use serde::{Serialize, Deserialize};
 
 //pub mod map;
-pub mod url_map;
+mod url_map;
 pub type UrlMap = url_map::UrlMap;
 
-pub mod url_type;
+mod url_type;
 pub type UrlType = url_type::UrlType;
 
-pub mod static_map;
+mod static_map;
 pub type StaticMap = static_map::StaticMap;
 
-#[derive(Serialize, Deserialize)]
-pub struct Endpoint {
-    pub path: String,
-    pub method: String,
-    pub groups: Vec<String>,
-}
+mod endpoint;
+pub type Endpoint = endpoint::Endpoint;
 
 #[derive(Serialize, Deserialize)]
 pub struct Domain {

@@ -7,7 +7,7 @@ mod url;
 mod util;
 
 use crate::app::{Config};
-use crate::url::static_map::{StaticMap};
+use crate::url::{StaticMap};
 use crate::app::service::{forward};
 
 #[actix_rt::main]

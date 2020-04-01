@@ -7,12 +7,11 @@ use crate::app::Config;
 use crate::util::jwt::{validate_request};
 use crate::url::StaticMap;
 
-async fn send(
-    client: &Client,
-    url: &str,
-    req: HttpRequest,
-    body: web::Bytes,
-) -> Result<HttpResponse, Error> {
+async fn send(client: &Client
+              , url: &str
+              , req: HttpRequest
+              , body: web::Bytes) -> Result<HttpResponse, Error>
+{
     // Build the client request for the proxy
     let mut forwarded_req = client
         .request_from(url, req.head())
@@ -37,13 +36,12 @@ async fn send(
     Ok(client_resp.body(res.body().await?))
 }
 
-pub async fn forward(
-    config: web::Data<Config>,
-    endpoints: web::Data<StaticMap>,
-    client: web::Data<Client>,
-    req: HttpRequest,
-    body: web::Bytes
-) -> impl Responder {
+pub async fn forward(config: web::Data<Config>
+                     , endpoints: web::Data<StaticMap>
+                     , client: web::Data<Client>
+                     , req: HttpRequest
+                     , body: web::Bytes) -> impl Responder
+{
     let x: &Method = req.method();
     let lookup = format!("{} {}", req.method(), req.path());
 
