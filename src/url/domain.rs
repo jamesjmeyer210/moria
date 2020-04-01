@@ -8,7 +8,7 @@ pub struct Domain {
 }
 
 impl Domain {
-    fn from_static(o: &'static str, e: Vec<Endpoint>) -> Self {
+    pub fn from_static(o: &'static str, e: Vec<Endpoint>) -> Self {
         Domain {
             origin: o.to_string(),
             endpoints: e,

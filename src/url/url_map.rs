@@ -214,37 +214,15 @@ mod test {
 
     #[test]
     fn init_meta_returns_tuple_when_passed_proper_collection() {
-        let domains = vec![
-            Domain {
-                origin: "first-origin".to_string(),
-                endpoints: vec![
-                    Endpoint {
-                        path: "/foo".to_string(),
-                        method: "GET".to_string(),
-                        groups: vec!["foos".to_string()]
-                    },
-                    Endpoint {
-                        path: "/bar".to_string(),
-                        method: "POST".to_string(),
-                        groups: vec!["bars".to_string()]
-                    }
-                ]
-            },
-            Domain {
-                origin: "second-origin".to_string(),
-                endpoints: vec![
-                    Endpoint {
-                        path: "/another-foo".to_string(),
-                        method: "GET".to_string(),
-                        groups: vec!["foos".to_string()]
-                    },
-                    Endpoint {
-                        path: "/another-bar".to_string(),
-                        method: "POST".to_string(),
-                        groups: vec!["bars".to_string()]
-                    }
-                ]
-            }
+        let domains: Vec<Domain> = vec![
+            Domain::from_static("first-origin", vec![
+                Endpoint::from_static("/foo", "GET", vec!["foos"]),
+                Endpoint::from_static("/bar", "POST", vec!["bars"]),
+            ]),
+            Domain::from_static("second-origin", vec![
+                Endpoint::from_static("/another-foo", "GET", vec!["foos"]),
+                Endpoint::from_static("/another-bar", "POST", vec!["bars"]),
+            ]),
         ];
 
         let meta = UrlMap::init_origins_groups_methods_metadata(&domains);

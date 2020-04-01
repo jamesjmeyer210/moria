@@ -8,7 +8,7 @@ pub struct Endpoint {
 }
 
 impl Endpoint {
-    fn from_static(p: &'static str, m: &'static str, g: Vec<&'static str>) -> Endpoint {
+    pub fn from_static(p: &'static str, m: &'static str, g: Vec<&'static str>) -> Endpoint {
         if g.len() == 0 {
             Endpoint {
                 path: p.to_string(),
