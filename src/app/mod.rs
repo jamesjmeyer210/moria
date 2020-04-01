@@ -1,4 +1,3 @@
-use serde::{Serialize, Deserialize};
 use std::fs;
 use crate::url::Domain;
 

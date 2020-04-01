@@ -13,11 +13,8 @@ pub type StaticMap = static_map::StaticMap;
 mod endpoint;
 pub type Endpoint = endpoint::Endpoint;
 
-#[derive(Serialize, Deserialize)]
-pub struct Domain {
-    pub origin: String,
-    pub endpoints: Vec<Endpoint>,
-}
+mod domain;
+pub type Domain = domain::Domain;
 
 mod metadata;
 pub type MetaData = metadata::MetaData;
