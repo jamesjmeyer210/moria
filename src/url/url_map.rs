@@ -35,7 +35,10 @@ pub struct UrlMap {
 impl UrlMap {
 
     fn init_origins_groups_methods_metadata(domains: &Vec<Domain>)
-        -> (Vec<String>, Vec<String>, Vec<String>, Vec<MetaDataRef>)
+        -> (Vec<String>, // origins
+            Vec<String>, // groups
+            Vec<String>, // methods
+            Vec<MetaDataRef>) // metadata
     {
         let mut origins = UniqueVec::with_capacity(domains.len());
         let mut groups = UniqueVec::new();
@@ -68,7 +71,6 @@ impl UrlMap {
         let dynamic_sub_path = Regex::new(r"(\{string\}|\{integer\}|\{bool\}|\{real\})").unwrap();
 
         let mut count: (usize, usize) = (0, 0);
-
 
         for domain in domains.iter() {
             for endpoint in domain.endpoints.iter() {
@@ -156,8 +158,8 @@ impl UrlMap {
             groups: meta.0,
             origins: meta.1,
             methods: meta.2,
-            map: Vec::new(), // TODO: convert the map to the proper type and store it here
             metadata: meta.3,
+            map: Vec::new(), // TODO: convert the map to the proper type and store it here
             urls: Vec::new(), // TODO: store the urls here
         }
     }

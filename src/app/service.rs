@@ -5,7 +5,7 @@ use std::str;
 
 use crate::app::Config;
 use crate::util::jwt::{validate_request};
-use crate::url::static_map::StaticMap;
+use crate::url::StaticMap;
 
 async fn send(
     client: &Client,
