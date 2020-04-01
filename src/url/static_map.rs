@@ -19,7 +19,7 @@ impl StaticMap {
         for domain in domains {
             for endpoint in domain.endpoints {
                 let key = format!("{} {}", endpoint.method, &endpoint.path);
-                map.insert(key, MetaData::new(
+                map.insert(key, MetaData::from_strings(
                     domain.origin.clone(),
                     endpoint.groups,
                 ));
