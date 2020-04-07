@@ -83,4 +83,20 @@ mod test {
         assert_eq!(false, UrlBuilder::path_is_fixed(path));
     }
 
+    #[test]
+    fn build_creates_accessible_urls(){
+        let mut ub = UrlBuilder::new();
+        let a = ub.build("POST", "/api/add-user", vec!["users","admins"], "website.com");
+
+        assert_eq!(0, a.method);
+        assert_eq!(0, a.path);
+        assert_eq!(vec![0, 1], a.groups);
+        assert_eq!(0, a.origin);
+
+        let b = ub.build("GET", "/api/user", vec!["users","admins","vendors"], "website.com");
+        assert_eq!(1, b.method);
+        assert_eq!(1, b.path);
+        assert_eq!(vec![0, 1, 2], b.groups);
+        assert_eq!(0, b.origin);
+    }
 }
