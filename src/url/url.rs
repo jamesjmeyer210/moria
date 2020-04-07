@@ -3,11 +3,11 @@ use std::str::FromStr;
 use crate::util::UniqueVec;
 
 pub struct Url {
-    fixed: bool,
-    method: usize,
-    path: usize,
-    groups: Vec<usize>,
-    origin: usize,
+    pub fixed: bool,
+    pub method: usize,
+    pub path: usize,
+    pub groups: Vec<usize>,
+    pub origin: usize,
 }
 
 impl Url {
@@ -39,6 +39,22 @@ impl UrlBuilder {
         }
     }
 
+    pub fn get_method(&self, index: usize) -> Option<&String> {
+        self.methods.get(index)
+    }
+
+    pub fn get_path(&self, index: usize) -> Option<&String> {
+        self.paths.get(index)
+    }
+
+    pub fn get_origin(&self, index: usize) -> Option<&String> {
+        self.origins.get(index)
+    }
+
+    pub fn get_group(&self, index: usize) -> Option<&String> {
+        self.groups.get(index)
+    }
+
     pub fn path_is_fixed(path: &str) -> bool {
         let sub_paths: Vec<&str> = path.split("/").collect();
         for sub_path in sub_paths.iter() {
@@ -50,7 +66,7 @@ impl UrlBuilder {
         true
     }
 
-    pub fn build(&mut self, method: &str, path: &str, groups: Vec<&str>, origin: &str) -> Url {
+    pub fn build(&mut self, method: &str, path: &str, groups: &Vec<&str>, origin: &str) -> Url {
 
         let mut g = Vec::with_capacity(groups.len());
         for group in groups.iter() {
@@ -86,7 +102,7 @@ mod test {
     #[test]
     fn build_creates_accessible_urls(){
         let mut ub = UrlBuilder::new();
-        let a = ub.build("POST", "/api/add-user", vec!["users","admins"], "website.com");
+        let a = ub.build("POST", "/api/add-user", &vec!["users","admins"], "website.com");
 
         assert_eq!(0, a.method);
         assert_eq!(0, a.path);
@@ -94,7 +110,7 @@ mod test {
         assert_eq!(0, a.origin);
         assert_eq!(true, a.fixed);
 
-        let b = ub.build("GET", "/api/user", vec!["users","admins","vendors"], "website.com");
+        let b = ub.build("GET", "/api/user", &vec!["users","admins","vendors"], "website.com");
         assert_eq!(1, b.method);
         assert_eq!(1, b.path);
         assert_eq!(vec![0, 1, 2], b.groups);

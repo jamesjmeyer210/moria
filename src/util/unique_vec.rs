@@ -17,6 +17,10 @@ impl <T>UniqueVec<T> where T : PartialEq {
         }
     }
 
+    pub fn get(&self, index: usize) -> Option<&T> {
+        self.data.get(index)
+    }
+
     pub fn push(&mut self, elem: T) -> usize {
         if !self.data.contains(&elem) {
             self.data.push(elem);
