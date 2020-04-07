@@ -1,5 +1,6 @@
 use crate::url::path::Path;
 use std::str::FromStr;
+use crate::util::UniqueVec;
 
 pub struct Url {
     fixed: bool,
@@ -22,41 +23,64 @@ impl Url {
 }
 // The UrlBuilder is a singleton that holds on to each unique origin and group
 pub struct UrlBuilder {
-    methods: Vec<String>,   // only unique methods
-    paths: Vec<String>,     // only unique paths
-    origins: Vec<String>,   // only unique origins
-    groups: Vec<String>,    // only unique groups
+    methods: UniqueVec<String>,
+    paths: UniqueVec<String>,
+    origins: UniqueVec<String>,
+    groups: UniqueVec<String>,
 }
 // TODO: build using the unique vec
 impl UrlBuilder {
     pub fn new() -> Self {
         UrlBuilder {
-            methods: Vec::new(),
-            paths: Vec::new(),
-            origins: Vec::new(),
-            groups: Vec::new(),
+            methods: UniqueVec::new(),
+            paths: UniqueVec::new(),
+            origins: UniqueVec::new(),
+            groups: UniqueVec::new(),
         }
+    }
+
+    pub fn path_is_fixed(path: &str) -> bool {
+        let sub_paths: Vec<&str> = path.split("/").collect();
+        for sub_path in sub_paths.iter() {
+            match *sub_path {
+                "{}" => return false,
+                _ => ()
+            }
+        }
+        true
     }
 
     pub fn build(&mut self, method: &str, path: &str, groups: Vec<&str>, origin: &str) -> Url {
-        self.methods.push(method.to_string());
-        self.paths.push(path.to_string());
-        self.origins.push(origin.to_string());
-        for group in groups {
-            self.groups.push(group.to_string());
-        }
 
-        let mut groups: Vec<String> = Vec::with_capacity(self.groups.len());
-        for group in self.groups.iter() {
-            groups.push(group.to_string())
+        let mut g = Vec::with_capacity(groups.len());
+        for group in groups.iter() {
+            g.push(self.groups.push(group.to_string()));
         }
 
         Url {
-            fixed: false,
-            method: 0,
-            path: 0,
-            groups: vec![0],
-            origin: 0,
+            fixed: UrlBuilder::path_is_fixed(path),
+            method: self.methods.push(method.to_string()),
+            path: self.paths.push(path.to_string()),
+            groups: g,
+            origin: self.origins.push(origin.to_string()),
         }
     }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::url::url::UrlBuilder;
+
+    #[test]
+    fn path_is_fixed_returns_true_when_fixed() {
+        let path = "/api/status";
+        assert_eq!(true, UrlBuilder::path_is_fixed(path));
+    }
+
+    #[test]
+    fn path_is_fixed_returns_false_when_dynamic(){
+        let path = "/api/user/{}";
+        assert_eq!(false, UrlBuilder::path_is_fixed(path));
+    }
+
 }
