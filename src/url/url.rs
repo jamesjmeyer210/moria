@@ -1,11 +1,24 @@
 use crate::url::path::Path;
 use std::str::FromStr;
 
-pub struct Url<'a> {
-    method: &'a str,
-    path: &'a str,
-    groups: Vec<&'a str>,
-    origin: &'a str,
+pub struct Url {
+    fixed: bool,
+    method: usize,
+    path: usize,
+    groups: Vec<usize>,
+    origin: usize,
+}
+
+impl Url {
+    pub fn from_parts(f: bool, m: usize, p: usize, g: Vec<usize>, o: usize) -> Self {
+        Url {
+            fixed: f,
+            method: m,
+            path: p,
+            groups: g,
+            origin: o,
+        }
+    }
 }
 // The UrlBuilder is a singleton that holds on to each unique origin and group
 pub struct UrlBuilder {
@@ -14,7 +27,7 @@ pub struct UrlBuilder {
     origins: Vec<String>,   // only unique origins
     groups: Vec<String>,    // only unique groups
 }
-
+// TODO: build using the unique vec
 impl UrlBuilder {
     pub fn new() -> Self {
         UrlBuilder {
@@ -33,16 +46,17 @@ impl UrlBuilder {
             self.groups.push(group.to_string());
         }
 
-        let mut groups: Vec<&str> = Vec::with_capacity(self.groups.len());
+        let mut groups: Vec<String> = Vec::with_capacity(self.groups.len());
         for group in self.groups.iter() {
-            groups.push(group)
+            groups.push(group.to_string())
         }
 
         Url {
-            method: self.methods.last().unwrap(),
-            path: self.paths.last().unwrap(),
-            groups,
-            origin: self.origins.last().unwrap(),
+            fixed: false,
+            method: 0,
+            path: 0,
+            groups: vec![0],
+            origin: 0,
         }
     }
 }
