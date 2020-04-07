@@ -72,11 +72,11 @@ impl UrlTable {
         self.static_table.get(&key)
     }
 
-    pub fn lookup(&self, method: &str, path: &str) -> Option<Url> {
+    pub fn lookup(&self, method: &str, path: &str) -> Option<&Url> {
 
         let try_static = self.static_lookup(method, path);
         if try_static.is_some() {
-            Some(Url::from_parts(true,0, 0, vec![0], 0))
+            Some(self.urls.get(try_static.unwrap()).unwrap())
         }
         else if false {
             // TODO: try dynamic_lookup
