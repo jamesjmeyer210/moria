@@ -67,22 +67,6 @@ impl UrlTable {
         }
     }
 
-    // fn init_static(&mut self, keys: &Vec<&str>, values: &Vec<&Url>) -> Result<(),UrlTableError> {
-    //     if keys.len() != values.len() {
-    //         Err(UrlTableError::KeysValuesMismatch(keys.len(),values.len()))
-    //     }
-    //     else {
-    //         for i in 0..keys.len() {
-    //             self.urls.push(values.get(i).unwrap().unwrap().clone());
-    //             self.static_table.insert(
-    //                 keys.get(i).unwrap().to_string(),
-    //                 0, // TODO: complete this insert
-    //             );
-    //         }
-    //         Ok(())
-    //     }
-    // }
-
     fn static_lookup(&self, method: &str, path: &str,) -> Option<&usize> {
         let key = format!("{}{}", method, path);
         self.static_table.get(&key)
