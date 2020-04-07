@@ -92,11 +92,13 @@ mod test {
         assert_eq!(0, a.path);
         assert_eq!(vec![0, 1], a.groups);
         assert_eq!(0, a.origin);
+        assert_eq!(true, a.fixed);
 
         let b = ub.build("GET", "/api/user", vec!["users","admins","vendors"], "website.com");
         assert_eq!(1, b.method);
         assert_eq!(1, b.path);
         assert_eq!(vec![0, 1, 2], b.groups);
         assert_eq!(0, b.origin);
+        assert_eq!(true, a.fixed);
     }
 }

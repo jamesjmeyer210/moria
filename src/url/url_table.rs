@@ -9,8 +9,8 @@ enum UrlTableError {
 
 pub struct UrlTable {
     urls: Vec<Url>,
-    static_table: HashMap<String,usize>,
-    // TODO: Add dynamic table
+    static_table: HashMap<String,usize>,        // (method + path), url
+    dynamic_table: Vec<(usize, usize, usize)>   // method, path, url
 }
 
 impl UrlTable {
@@ -19,6 +19,7 @@ impl UrlTable {
         UrlTable {
             urls: Vec::new(),
             static_table: HashMap::new(),
+            dynamic_table: Vec::new(),
         }
     }
 
