@@ -8,32 +8,55 @@ enum UrlTableError {
 }
 
 pub struct UrlTable {
-    static_table: HashMap<String,AuthObj>,
+    urls: Vec<Url>,
+    static_table: HashMap<String,usize>,
     // TODO: Add dynamic table
 }
 
 impl UrlTable {
-    fn init_static(&mut self, keys: &Vec<&str>, values: &Vec<&AuthObj>) -> Result<(),UrlTableError> {
-        if keys.len() != values.len() {
-            Err(UrlTableError::KeysValuesMismatch(keys.len(),values.len()))
-        }
-        else {
-            self.static_table = HashMap::with_capacity(keys.len());
-            for i in 0..keys.len() {
-                self.static_table.insert(
-                    keys.get(i).unwrap().to_string(),
-                    values.get(i).unwrap().to_owned().clone(),
-                );
-            }
-            Ok(())
+
+    fn new() -> Self {
+        UrlTable {
+            urls: Vec::new(),
+            static_table: HashMap::new(),
         }
     }
 
-    fn static_lookup(&self, method: &str, path: &str,) -> Option<&AuthObj> {
+    // fn init_static(&mut self, keys: &Vec<&str>, values: &Vec<&Url>) -> Result<(),UrlTableError> {
+    //     if keys.len() != values.len() {
+    //         Err(UrlTableError::KeysValuesMismatch(keys.len(),values.len()))
+    //     }
+    //     else {
+    //         for i in 0..keys.len() {
+    //             self.urls.push(values.get(i).unwrap().unwrap().clone());
+    //             self.static_table.insert(
+    //                 keys.get(i).unwrap().to_string(),
+    //                 0, // TODO: complete this insert
+    //             );
+    //         }
+    //         Ok(())
+    //     }
+    // }
+
+    fn static_lookup(&self, method: &str, path: &str,) -> Option<&usize> {
         let key = format!("{}{}", method, path);
         self.static_table.get(&key)
     }
 
+    pub fn lookup(&self, method: &str, path: &str) -> Option<Url> {
+
+        let try_static = self.static_lookup(method, path);
+        if try_static.is_some() {
+            Some(Url::from_parts(true,0, 0, vec![0], 0))
+        }
+        else if false {
+            // TODO: try dynamic_lookup
+            None
+        }
+        else {
+            None
+        }
+    }
     // TODO:
     // Implement dynamic lookup to complement static lookup
 
@@ -44,4 +67,9 @@ impl UrlTable {
     // fn dynamic_lookup(&self, method: &str, path: &str) -> Option<Url> {
     //     unimplemented!()
     // }
+}
+
+#[cfg(test)]
+mod test {
+
 }
