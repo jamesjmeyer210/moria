@@ -1,4 +1,3 @@
-use crate::url::path::Path;
 use std::str::FromStr;
 use crate::util::UniqueVec;
 
