@@ -1,11 +1,11 @@
+use crate::model::{AuthObj, ConfigError, Domain, JwtPayload};
 use actix_web::client::Client;
 use actix_web::{web, Error, HttpRequest, HttpResponse, Responder};
-use std::collections::HashMap;
-use std::str;
-use std::fs;
 use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use crate::model::{ConfigError, AuthObj, JwtPayload, Domain};
+use std::collections::HashMap;
+use std::fs;
+use std::str;
 
 #[macro_use]
 mod util;
@@ -68,8 +68,6 @@ pub async fn forward(
         None => HttpResponse::NotFound().body(lookup),
     }
 }
-
-
 
 pub fn load_endpoints(path: &str) -> HashMap<String, AuthObj> {
     let domains: Vec<Domain> = load_json_file!(path);
@@ -313,7 +311,7 @@ mod test {
             &claims,
             &EncodingKey::from_secret(conf.jwt_secret.as_bytes()),
         )
-            .unwrap();
+        .unwrap();
 
         let req = test::TestRequest::with_header("jwt-token", token).to_http_request();
         let result = validate_request(&conf, &req, &auth_obj);
@@ -363,7 +361,7 @@ mod test {
             &claims,
             &EncodingKey::from_secret(conf.jwt_secret.as_bytes()),
         )
-            .unwrap();
+        .unwrap();
 
         let req = test::TestRequest::with_header("jwt-token", token).to_http_request();
         let result = validate_request(&conf, &req, &auth_obj);

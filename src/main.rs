@@ -1,7 +1,7 @@
 use actix_web::client::Client;
 use actix_web::{web, App, HttpServer};
+use moria::{forward, load_endpoints, Config};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-use moria::{Config, load_endpoints, forward};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
