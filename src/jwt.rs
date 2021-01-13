@@ -1,10 +1,10 @@
-use jsonwebtoken::{decode, Validation, DecodingKey};
-use jsonwebtoken::errors::ErrorKind;
-use serde::{Serialize, Deserialize};
 use actix_web::HttpRequest;
+use jsonwebtoken::errors::ErrorKind;
+use jsonwebtoken::{decode, DecodingKey, Validation};
+use serde::{Deserialize, Serialize};
 
-use crate::AuthObj;
 use crate::startup::Config;
+use crate::AuthObj;
 
 #[derive(Serialize, Deserialize)]
 struct JwtPayload {
@@ -20,14 +20,16 @@ pub enum HeaderError {
 }
 
 // TODO: clean up this method so it doesn't have so many nested match blocks
-pub fn validate_request(conf: &Config, req: &HttpRequest, auth_obj: &AuthObj) -> Result<(),HeaderError> {
+pub fn validate_request(
+    conf: &Config,
+    req: &HttpRequest,
+    auth_obj: &AuthObj,
+) -> Result<(), HeaderError> {
     // If the AuthObject for the endpoint in question does not have any defined groups, no authentication
     // is required because none has been defined.
-    if auth_obj.groups.is_empty(){
+    if auth_obj.groups.is_empty() {
         return Ok(());
-    }
-
-    else if !req.headers().contains_key(&conf.jwt_key_name) {
+    } else if !req.headers().contains_key(&conf.jwt_key_name) {
         return Err(HeaderError::KeyNotFound);
     }
     // Because of the check above, this line should never fail
@@ -35,7 +37,7 @@ pub fn validate_request(conf: &Config, req: &HttpRequest, auth_obj: &AuthObj) ->
     let token_data = decode::<JwtPayload>(
         &std::str::from_utf8(token.as_bytes()).unwrap(),
         &DecodingKey::from_secret(&conf.jwt_secret.as_bytes()),
-        &Validation::default()
+        &Validation::default(),
     );
 
     if token_data.is_err() {
@@ -60,8 +62,8 @@ mod tests {
     // import the functions and struct from the higher level module
     use super::*;
     use actix_web::test;
-    use jsonwebtoken::{encode, Header, EncodingKey, Algorithm};
     use chrono::prelude::*;
+    use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 
     fn default_config(jwt_key: &str, jwt_value: &str) -> Config {
         Config {
@@ -79,7 +81,7 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_ok_when_auth_groups_is_empty(){
+    fn validate_request_returns_ok_when_auth_groups_is_empty() {
         // Create mock objects from the internal code base
         let conf = default_config("", "");
 
@@ -96,16 +98,13 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_err_when_jwt_header_does_not_exist(){
-
+    fn validate_request_returns_err_when_jwt_header_does_not_exist() {
         let conf = default_config("jwt-token", "");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
             // Provide at lease one group so we can get past the first check
-            groups: vec![
-                "users".to_string()
-            ],
+            groups: vec!["users".to_string()],
         };
 
         let req = test::TestRequest::default().to_http_request();
@@ -117,27 +116,25 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_err_when_jwt_value_is_invalid(){
-
+    fn validate_request_returns_err_when_jwt_value_is_invalid() {
         let conf = default_config("jwt-token", "secret");
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
-            groups: vec![
-                "users".to_string()
-            ],
+            groups: vec!["users".to_string()],
         };
 
-        let req = test::TestRequest::with_header("jwt-token", "wrong-secret")
-            .to_http_request();
+        let req = test::TestRequest::with_header("jwt-token", "wrong-secret").to_http_request();
         let result = validate_request(&conf, &req, &auth_obj);
 
-        assert_eq!("JwtError(InvalidToken)", format!("{:?}", result.unwrap_err()))
+        assert_eq!(
+            "JwtError(InvalidToken)",
+            format!("{:?}", result.unwrap_err())
+        )
     }
 
     #[test]
-    fn validate_request_returns_ok_when_group_is_found(){
-
+    fn validate_request_returns_ok_when_group_is_found() {
         let conf = default_config("jwt-token", "secret");
 
         let auth_obj = AuthObj {
@@ -147,14 +144,15 @@ mod tests {
 
         let claims = JwtPayload {
             exp: Utc.timestamp(32503680000, 0).timestamp(),
-            groups: vec!["users".to_string(), "admins".to_string()]
+            groups: vec!["users".to_string(), "admins".to_string()],
         };
 
         let token = encode::<JwtPayload>(
             &Header::new(Algorithm::HS256),
             &claims,
-            &EncodingKey::from_secret(conf.jwt_secret.as_bytes())
-        ).unwrap();
+            &EncodingKey::from_secret(conf.jwt_secret.as_bytes()),
+        )
+        .unwrap();
 
         let req = test::TestRequest::with_header("jwt-token", token).to_http_request();
         let result = validate_request(&conf, &req, &auth_obj);
@@ -163,11 +161,11 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_ok_when_group_is_found_in_raw_jwt(){
-
+    fn validate_request_returns_ok_when_group_is_found_in_raw_jwt() {
         let conf = default_config("jwt-token", "secret");
 
-        let raw_jwt = format!("{}.{}.{}",
+        let raw_jwt = format!(
+            "{}.{}.{}",
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9",
             "eyJleHAiOjMyNTAzNjgwMDAwLCJncm91cHMiOlsidXNlcnMiLCJhZG1pbnMiXX0",
             "8LGHRBirzKJPP4xhbyvIRLO-B7wMpUzJrOWgub4zASs"
@@ -175,9 +173,7 @@ mod tests {
 
         let auth_obj = AuthObj {
             origin: "".to_string(),
-            groups: vec![
-                "users".to_string()
-            ],
+            groups: vec!["users".to_string()],
         };
 
         let req = test::TestRequest::with_header("jwt-token", raw_jwt).to_http_request();
@@ -188,8 +184,7 @@ mod tests {
     }
 
     #[test]
-    fn validate_request_returns_err_when_group_is_not_found(){
-
+    fn validate_request_returns_err_when_group_is_not_found() {
         let conf = default_config("jwt-token", "secret");
 
         let auth_obj = AuthObj {
@@ -199,14 +194,15 @@ mod tests {
 
         let claims = JwtPayload {
             exp: Utc.timestamp(32503680000, 0).timestamp(),
-            groups: vec!["users".to_string(), "admins".to_string()]
+            groups: vec!["users".to_string(), "admins".to_string()],
         };
 
         let token = encode::<JwtPayload>(
             &Header::new(Algorithm::HS256),
             &claims,
-            &EncodingKey::from_secret(conf.jwt_secret.as_bytes())
-        ).unwrap();
+            &EncodingKey::from_secret(conf.jwt_secret.as_bytes()),
+        )
+        .unwrap();
 
         let req = test::TestRequest::with_header("jwt-token", token).to_http_request();
         let result = validate_request(&conf, &req, &auth_obj);
