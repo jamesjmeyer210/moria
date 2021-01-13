@@ -10,5 +10,3 @@ pub type ConfigError = config::ConfigError;
 pub type Domain = domain::Domain;
 pub type Endpoint = endpoint::Endpoint;
 pub type JwtPayload = jwt_payload::JwtPayload;
-
-use super::util;

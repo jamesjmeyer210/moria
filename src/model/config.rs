@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
-#[macro_use]
-use super::util::load_json;
 
 #[derive(Debug, PartialEq)]
 pub enum ConfigError {

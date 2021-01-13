@@ -1,12 +1,10 @@
 use actix_web::client::Client;
-use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
-use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use actix_web::{web, Error, HttpRequest, HttpResponse, Responder};
 use std::collections::HashMap;
 use std::str;
 use std::fs;
 use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use serde::{Deserialize, Serialize};
 use crate::model::{ConfigError, AuthObj, JwtPayload, Domain};
 
 #[macro_use]

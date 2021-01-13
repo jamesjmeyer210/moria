@@ -1,8 +1,6 @@
 use actix_web::client::Client;
-use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-use std::collections::HashMap;
-use std::str;
 use moria::{Config, load_endpoints, forward};
 
 #[actix_rt::main]
