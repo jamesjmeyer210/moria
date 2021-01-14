@@ -10,6 +10,8 @@ use std::str;
 #[macro_use]
 mod util;
 mod model;
+mod auth;
+mod proxy;
 
 pub type Config = model::Config;
 
