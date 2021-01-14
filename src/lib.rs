@@ -111,7 +111,7 @@ pub fn validate_request(
     let token_data = decode::<JwtPayload>(
         &std::str::from_utf8(token.as_bytes()).unwrap(),
         &DecodingKey::from_secret(&conf.jwt_secret.as_bytes()),
-        &Validation::default(),
+        &Validation::default()
     );
 
     if token_data.is_err() {
