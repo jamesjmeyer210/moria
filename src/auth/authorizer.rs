@@ -1,4 +1,4 @@
-use crate::auth::traits::Authentication;
+use crate::auth::traits::Authorization;
 use crate::auth::url_map::UriMap;
 use crate::model::{AuthObj, JwtPayload};
 use crate::Config;
@@ -8,15 +8,15 @@ use actix_web::HttpRequest;
 use jsonwebtoken::{decode, DecodingKey, TokenData, Validation};
 use std::sync::{Arc, Mutex};
 
-pub struct Authenticator {
+pub struct Authorizer {
     jwt_name: String,
     jwt_secret: String,
     endpoints: UriMap,
 }
 
-impl Authenticator {
+impl Authorizer {
     pub fn new(jwt_name: String, jwt_secret: String, endpoints: UriMap) -> Self {
-        Authenticator {
+        Authorizer {
             jwt_name,
             jwt_secret,
             endpoints,
@@ -42,8 +42,8 @@ impl Authenticator {
     }
 }
 
-impl Authentication<&HttpRequest> for Authenticator {
-    fn authenticate(&self, req: &HttpRequest) -> bool {
+impl Authorization<&HttpRequest> for Authorizer {
+    fn authorize(&self, req: &HttpRequest) -> bool {
         // First, try to get our groups based off their uri
         let groups = self.endpoints.get(req.uri());
         if groups.is_none() {
@@ -73,7 +73,7 @@ mod test {
 
     #[test]
     fn verify_header_returns_some_when_value_is_valid() -> () {
-        let auth = Authenticator::new("".to_string(), "secret".to_string(), UriMap::new());
+        let auth = Authorizer::new("".to_string(), "secret".to_string(), UriMap::new());
 
         let token = HeaderValue::from_static(
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
@@ -86,7 +86,7 @@ mod test {
 
     #[test]
     fn verify_header_value_returns_none_when_signature_does_not_match() -> () {
-        let auth = Authenticator::new("".to_string(), "secret".to_string(), UriMap::new());
+        let auth = Authorizer::new("".to_string(), "secret".to_string(), UriMap::new());
 
         let token = HeaderValue::from_static(
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
@@ -101,7 +101,7 @@ mod test {
     fn verify_header_map_returns_none_when_key_does_not_exist() -> () {
         let req = test::TestRequest::with_header("blue", "missing").to_http_request();
 
-        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
+        let auth = Authorizer::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_none());
@@ -112,7 +112,7 @@ mod test {
         let req =
             test::TestRequest::with_header("green", "illegal/\"header@value").to_http_request();
 
-        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
+        let auth = Authorizer::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_none());
@@ -128,7 +128,7 @@ mod test {
         )
         .to_http_request();
 
-        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
+        let auth = Authorizer::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_none());
@@ -144,7 +144,7 @@ mod test {
         )
         .to_http_request();
 
-        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
+        let auth = Authorizer::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_some());

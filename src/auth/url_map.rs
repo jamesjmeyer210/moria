@@ -1,4 +1,4 @@
-use crate::auth::traits::Authentication;
+use crate::auth::traits::Authorization;
 use crate::model::AuthObj;
 use actix_http::http::Uri;
 use std::collections::HashMap;

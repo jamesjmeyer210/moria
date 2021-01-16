@@ -1,3 +1,3 @@
-pub trait Authentication<T> {
-    fn authenticate(&self, _: T) -> bool;
+pub trait Authorization<T> {
+    fn authorize(&self, _: T) -> bool;
 }

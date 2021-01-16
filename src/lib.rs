@@ -9,7 +9,7 @@ use std::str;
 
 #[macro_use]
 mod util;
-mod auth;
+pub mod auth;
 mod model;
 mod proxy;
 
