@@ -1,12 +1,12 @@
-use crate::Config;
-use std::sync::{Arc, Mutex};
-use crate::auth::url_map::UriMap;
-use actix_web::HttpRequest;
 use crate::auth::traits::Authentication;
-use actix_web::http::{HeaderMap, HeaderValue};
-use jsonwebtoken::{decode, DecodingKey, Validation, TokenData};
-use crate::model::{JwtPayload, AuthObj};
+use crate::auth::url_map::UriMap;
+use crate::model::{AuthObj, JwtPayload};
+use crate::Config;
 use actix_http::http::Uri;
+use actix_web::http::{HeaderMap, HeaderValue};
+use actix_web::HttpRequest;
+use jsonwebtoken::{decode, DecodingKey, TokenData, Validation};
+use std::sync::{Arc, Mutex};
 
 pub struct Authenticator {
     jwt_name: String,
@@ -27,17 +27,18 @@ impl Authenticator {
         match decode::<JwtPayload>(
             &std::str::from_utf8(value.as_bytes()).unwrap(),
             &DecodingKey::from_secret(self.jwt_secret.as_bytes()),
-            &Validation::default())
-        {
+            &Validation::default(),
+        ) {
             Ok(header) => Some(header),
             _ => None,
         }
     }
 
     fn verify_header_map(&self, header_map: &HeaderMap) -> Option<Vec<String>> {
-        header_map.get(&self.jwt_name)
-            .and_then(|header_value|self.verify_header_value(header_value))
-            .and_then(|jwt|Some(jwt.claims.groups))
+        header_map
+            .get(&self.jwt_name)
+            .and_then(|header_value| self.verify_header_value(header_value))
+            .and_then(|jwt| Some(jwt.claims.groups))
     }
 }
 
@@ -72,38 +73,35 @@ mod test {
 
     #[test]
     fn verify_header_returns_some_when_value_is_valid() -> () {
-        let auth = Authenticator::new("".to_string()
-                                      , "secret".to_string()
-                                      , UriMap::new());
+        let auth = Authenticator::new("".to_string(), "secret".to_string(), UriMap::new());
 
-        let token = HeaderValue::from_static("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
+        let token = HeaderValue::from_static(
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
         .eyJleHAiOjMyNTAzNjgwMDAwLCJncm91cHMiOlsidXNlcnMiLCJhZG1pbnMiXX0\
-        .8LGHRBirzKJPP4xhbyvIRLO-B7wMpUzJrOWgub4zASs");
+        .8LGHRBirzKJPP4xhbyvIRLO-B7wMpUzJrOWgub4zASs",
+        );
 
         assert!(auth.verify_header_value(&token).is_some());
     }
 
     #[test]
     fn verify_header_value_returns_none_when_signature_does_not_match() -> () {
-        let auth = Authenticator::new("".to_string()
-                                      , "secret".to_string()
-                                      , UriMap::new());
+        let auth = Authenticator::new("".to_string(), "secret".to_string(), UriMap::new());
 
-        let token = HeaderValue::from_static("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
+        let token = HeaderValue::from_static(
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
         .eyJleHAiOjMyNTAzNjgwMDAwLCJncm91cHMiOlsidXNlcnMiLCJhZG1pbnMiXX0\
-        .XO1xiMZljpvAOsXPGEKSJmyfgcUum7nOmUmw63kzyio");
+        .XO1xiMZljpvAOsXPGEKSJmyfgcUum7nOmUmw63kzyio",
+        );
 
         assert!(auth.verify_header_value(&token).is_none());
     }
 
     #[test]
     fn verify_header_map_returns_none_when_key_does_not_exist() -> () {
-        let req = test::TestRequest::with_header("blue", "missing")
-            .to_http_request();
+        let req = test::TestRequest::with_header("blue", "missing").to_http_request();
 
-        let auth = Authenticator::new("green".to_string()
-                                      , "secret".to_string()
-                                      , UriMap::new());
+        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_none());
@@ -111,12 +109,10 @@ mod test {
 
     #[test]
     fn verify_header_map_returns_none_jwt_formatting_is_illegal() -> () {
-        let req = test::TestRequest::with_header("green", "illegal/\"header@value")
-            .to_http_request();
+        let req =
+            test::TestRequest::with_header("green", "illegal/\"header@value").to_http_request();
 
-        let auth = Authenticator::new("green".to_string()
-                                      , "secret".to_string()
-                                      , UriMap::new());
+        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_none());
@@ -124,14 +120,15 @@ mod test {
 
     #[test]
     fn verify_header_map_returns_none_when_signature_is_invalid() -> () {
-        let req = test::TestRequest::with_header("green", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
+        let req = test::TestRequest::with_header(
+            "green",
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
             .eyJleHAiOjMyNTAzNjgwMDAwLCJncm91cHMiOlsidXNlcnMiLCJhZG1pbnMiXX0\
-            .XO1xiMZljpvAOsXPGEKSJmyfgcUum7nOmUmw63kzyio")
-            .to_http_request();
+            .XO1xiMZljpvAOsXPGEKSJmyfgcUum7nOmUmw63kzyio",
+        )
+        .to_http_request();
 
-        let auth = Authenticator::new("green".to_string()
-                                      , "secret".to_string()
-                                      , UriMap::new());
+        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_none());
@@ -139,14 +136,15 @@ mod test {
 
     #[test]
     fn verify_header_map_returns_groups_when_signature_is_valid() -> () {
-        let req = test::TestRequest::with_header("green", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
+        let req = test::TestRequest::with_header(
+            "green",
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\
             .eyJleHAiOjMyNTAzNjgwMDAwLCJncm91cHMiOlsidXNlcnMiLCJhZG1pbnMiXX0\
-            .8LGHRBirzKJPP4xhbyvIRLO-B7wMpUzJrOWgub4zASs")
-            .to_http_request();
+            .8LGHRBirzKJPP4xhbyvIRLO-B7wMpUzJrOWgub4zASs",
+        )
+        .to_http_request();
 
-        let auth = Authenticator::new("green".to_string()
-                                      , "secret".to_string()
-                                      , UriMap::new());
+        let auth = Authenticator::new("green".to_string(), "secret".to_string(), UriMap::new());
 
         let header = auth.verify_header_map(req.headers());
         assert!(header.is_some());
